@@ -127,3 +127,48 @@ class FootballDataClient:
         if not m or "id" not in m:
             return None
         return self._normalize_match(m)
+
+    def get_standings(self) -> list:
+        data = self._get(f"competitions/{COMPETITION}/standings")
+        rows = []
+        for block in data.get("standings", []):
+            if block.get("type") != "TOTAL":
+                continue
+            group = block.get("group")
+            for r in block.get("table", []):
+                rows.append({
+                    "group": group,
+                    "rank": r["position"],
+                    "team": r["team"]["name"],
+                    "flag": country_to_flag(r["team"]["name"]),
+                    "w": r["won"], "d": r["draw"], "l": r["lost"],
+                    "gf": r["goalsFor"], "ga": r["goalsAgainst"], "pts": r["points"],
+                })
+        return rows
+
+    def get_topscorers(self) -> list:
+        data = self._get(f"competitions/{COMPETITION}/scorers")
+        rows = []
+        for i, s in enumerate(data.get("scorers", []), start=1):
+            nat = s["player"].get("nationality") or s.get("team", {}).get("name", "")
+            rows.append({
+                "rank": i,
+                "player": s["player"]["name"],
+                "team": s.get("team", {}).get("name", ""),
+                "flag": country_to_flag(nat),
+                "goals": s.get("goals") or 0,
+                "assists": s.get("assists") or 0,
+            })
+        return rows
+
+    def get_events(self, mid: int) -> list:
+        m = self._get(f"matches/{mid}")
+        out = []
+        for g in m.get("goals", []) or []:
+            out.append({
+                "minute": g.get("minute"),
+                "type": "goal",
+                "team": g.get("team", {}).get("name", ""),
+                "player": g.get("scorer", {}).get("name", ""),
+            })
+        return out

@@ -82,3 +82,25 @@ def test_get_match_single(monkeypatch):
     client = _client_returning(monkeypatch, _load("wc_match_detail.json"))
     out = client.get_match(537301)
     assert out["id"] == 537301 and out["status"] == "LIVE"
+
+def test_get_standings(monkeypatch):
+    client = _client_returning(monkeypatch, _load("wc_standings.json"))
+    rows = client.get_standings()
+    assert rows[0] == {"group": "GROUP_A", "rank": 1, "team": "France", "flag": "🇫🇷",
+                       "w": 3, "d": 0, "l": 0, "gf": 8, "ga": 1, "pts": 9}
+    assert rows[1]["team"] == "Argentina"
+
+def test_get_topscorers(monkeypatch):
+    client = _client_returning(monkeypatch, _load("wc_scorers.json"))
+    rows = client.get_topscorers()
+    assert rows[0] == {"rank": 1, "player": "Kylian Mbappe", "team": "France",
+                       "flag": "🇫🇷", "goals": 5, "assists": 2}
+
+def test_get_events_goals(monkeypatch):
+    client = _client_returning(monkeypatch, _load("wc_match_detail.json"))
+    ev = client.get_events(537301)
+    assert ev == [{"minute": 34, "type": "goal", "team": "Colombia", "player": "Luis Diaz"}]
+
+def test_get_events_empty_when_no_goals(monkeypatch):
+    client = _client_returning(monkeypatch, {"id": 1, "goals": []})
+    assert client.get_events(1) == []
