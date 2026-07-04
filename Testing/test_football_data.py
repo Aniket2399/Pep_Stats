@@ -3,6 +3,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "ingestion"))
 import football_data as fd
 
 import json
+import pytest
 from datetime import datetime, timezone
 
 
@@ -104,3 +105,25 @@ def test_get_events_goals(monkeypatch):
 def test_get_events_empty_when_no_goals(monkeypatch):
     client = _client_returning(monkeypatch, {"id": 1, "goals": []})
     assert client.get_events(1) == []
+
+def test_get_raises_on_403(monkeypatch):
+    client = fd.FootballDataClient(api_key="bad")
+    monkeypatch.setattr(fd.requests, "get",
+                        lambda *a, **k: FakeResp(403, {"message": "forbidden"}))
+    with pytest.raises(fd.FootballDataError):
+        client.get_matches()
+
+def test_get_raises_on_429(monkeypatch):
+    client = fd.FootballDataClient(api_key="t")
+    monkeypatch.setattr(fd.requests, "get",
+                        lambda *a, **k: FakeResp(429, {"message": "too many"}))
+    with pytest.raises(fd.FootballDataError):
+        client.get_standings()
+
+def test_get_raises_on_network_error(monkeypatch):
+    client = fd.FootballDataClient(api_key="t")
+    def boom(*a, **k):
+        raise fd.requests.RequestException("dns fail")
+    monkeypatch.setattr(fd.requests, "get", boom)
+    with pytest.raises(fd.FootballDataError):
+        client.get_topscorers()
