@@ -85,10 +85,10 @@ class FootballDataClient:
         status = map_status(m["status"])
         home = m["homeTeam"]["name"]
         away = m["awayTeam"]["name"]
-        ft = m.get("score", {}).get("fullTime", {})
+        ft = (m.get("score") or {}).get("fullTime") or {}
         if status == "LIVE":
             minute = m.get("minute")
-            if minute:
+            if minute is not None:
                 time = f"{minute}'"
             else:
                 time = f"{elapsed_minutes(m['utcDate'], now or datetime.now(timezone.utc))}'"

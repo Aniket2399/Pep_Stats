@@ -127,3 +127,60 @@ def test_get_raises_on_network_error(monkeypatch):
     monkeypatch.setattr(fd.requests, "get", boom)
     with pytest.raises(fd.FootballDataError):
         client.get_topscorers()
+
+def test_request_uses_wc_path_and_auth_header(monkeypatch):
+    captured = {}
+    def rec(url, headers=None, params=None, timeout=None):
+        captured["url"] = url
+        captured["headers"] = headers
+        return FakeResp(200, _load("wc_matches.json"))
+    client = fd.FootballDataClient(api_key="secret-key")
+    monkeypatch.setattr(fd.requests, "get", rec)
+    client.get_matches()
+    assert captured["url"].endswith("/competitions/WC/matches")
+    assert captured["headers"]["X-Auth-Token"] == "secret-key"
+
+def test_get_matches_sorts_upcoming_asc_and_recent_desc(monkeypatch):
+    payload = {
+        "matches": [
+            {
+                "id": 1, "utcDate": "2026-07-10T18:00:00Z", "status": "SCHEDULED",
+                "stage": "GROUP_STAGE", "minute": None, "venue": "Stadium A",
+                "homeTeam": {"id": 1, "name": "Team A"},
+                "awayTeam": {"id": 2, "name": "Team B"},
+                "score": {"fullTime": {"home": None, "away": None}},
+            },
+            {
+                "id": 2, "utcDate": "2026-07-05T18:00:00Z", "status": "SCHEDULED",
+                "stage": "GROUP_STAGE", "minute": None, "venue": "Stadium B",
+                "homeTeam": {"id": 3, "name": "Team C"},
+                "awayTeam": {"id": 4, "name": "Team D"},
+                "score": {"fullTime": {"home": None, "away": None}},
+            },
+            {
+                "id": 3, "utcDate": "2026-07-08T18:00:00Z", "status": "TIMED",
+                "stage": "GROUP_STAGE", "minute": None, "venue": "Stadium C",
+                "homeTeam": {"id": 5, "name": "Team E"},
+                "awayTeam": {"id": 6, "name": "Team F"},
+                "score": {"fullTime": {"home": None, "away": None}},
+            },
+            {
+                "id": 4, "utcDate": "2026-06-20T18:00:00Z", "status": "FINISHED",
+                "stage": "GROUP_STAGE", "minute": None, "venue": "Stadium D",
+                "homeTeam": {"id": 7, "name": "Team G"},
+                "awayTeam": {"id": 8, "name": "Team H"},
+                "score": {"fullTime": {"home": 1, "away": 0}},
+            },
+            {
+                "id": 5, "utcDate": "2026-06-25T18:00:00Z", "status": "AWARDED",
+                "stage": "GROUP_STAGE", "minute": None, "venue": "Stadium E",
+                "homeTeam": {"id": 9, "name": "Team I"},
+                "awayTeam": {"id": 10, "name": "Team J"},
+                "score": {"fullTime": {"home": 2, "away": 0}},
+            },
+        ]
+    }
+    client = _client_returning(monkeypatch, payload)
+    bundle = client.get_matches()
+    assert [m["team1"]["name"] for m in bundle["upcoming"]] == ["Team C", "Team E", "Team A"]
+    assert [m["team1"]["name"] for m in bundle["recent"]] == ["Team I", "Team G"]
