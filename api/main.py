@@ -118,6 +118,39 @@ def envelope(cache, key, ttl, fetch_fn, mock):
 
 
 # ============================================================================
+# WORLD CUP DATA ENDPOINTS (real-time via football-data.org)
+# ============================================================================
+
+@app.get("/matches")
+def get_matches():
+    return envelope(cache, "wc:matches", 45,
+                    football.get_matches,
+                    {"live": [], "upcoming": [], "recent": []})
+
+@app.get("/match/{mid}")
+def get_match(mid: int):
+    def fetch():
+        m = football.get_match(mid)
+        if m is None:
+            raise FootballDataError(f"match {mid} not found")
+        return m
+    return envelope(cache, f"wc:match:{mid}", 45, fetch, {})
+
+@app.get("/match/{mid}/events")
+def get_match_events_wc(mid: int):
+    return envelope(cache, f"wc:events:{mid}", 45,
+                    lambda: football.get_events(mid), [])
+
+@app.get("/standings")
+def get_standings():
+    return envelope(cache, "wc:standings", 3600, football.get_standings, [])
+
+@app.get("/leaderboards")
+def get_leaderboards():
+    return envelope(cache, "wc:scorers", 21600, football.get_topscorers, [])
+
+
+# ============================================================================
 # PYDANTIC MODELS
 # ============================================================================
 
