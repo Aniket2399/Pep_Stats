@@ -9,7 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List, Optional, Dict, Set
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 import asyncio
 import json
 
@@ -71,8 +71,6 @@ except Exception as e:
     match_cache = None
 
 
-from datetime import timezone
-
 LASTGOOD_TTL = 7 * 24 * 3600  # 1 week
 
 # WC data provider (reads FOOTBALL_API_KEY from env; safe if key missing)
@@ -96,12 +94,12 @@ def cached(cache, key, ttl, fetch_fn):
             cache.set(key, fresh, ttl)
             cache.set(f"{key}:lastgood", fresh, LASTGOOD_TTL)
         return fresh, "live"
-    except FootballDataError:
+    except Exception:
         if cache is not None:
             lg = cache.get(f"{key}:lastgood")
             if lg is not None:
                 return lg, "cache"
-        raise
+        raise FootballDataError("fetch failed")
 
 
 def envelope(cache, key, ttl, fetch_fn, mock):

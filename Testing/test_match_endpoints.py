@@ -47,6 +47,14 @@ def test_envelope_mock_when_no_lastgood():
     assert env["source"] == "mock" and env["data"] == {"m": True}
     assert "fetched_at" in env
 
+def test_envelope_mock_on_non_footballdata_error():
+    from api import main
+    cache = make_cache()
+    def boom():
+        raise KeyError("homeTeam")   # malformed-JSON style error
+    env = main.envelope(cache, "kx", 60, boom, mock={"ok": False})
+    assert env["source"] == "mock" and env["data"] == {"ok": False}
+
 def test_envelope_live():
     from api import main
     cache = make_cache()
