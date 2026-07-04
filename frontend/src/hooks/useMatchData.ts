@@ -38,7 +38,8 @@ export function useMatchData(matchId?: number) {
         axios.get(ENDPOINTS.match(id), { timeout: 10000 }),
         axios.get(ENDPOINTS.matchEvents(id), { timeout: 10000 }),
       ]);
-      setMatch(matchRes.data.data);
+      const m = matchRes.data.data;
+      setMatch(m && m.id ? m : null);
       setEvents(evRes.data.data || []);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch match data');

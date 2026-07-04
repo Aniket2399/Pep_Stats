@@ -104,13 +104,13 @@ export default function TournamentPage() {
         )}
 
         {/* Standings */}
+        {dataError && <p className="text-red-600 text-sm">{dataError}</p>}
         {standings.length > 0 && (
           <section>
             <div className="flex items-center gap-3 mb-4">
               <Trophy className="text-fifa-gold" size={28} />
               <h2 className="text-2xl font-bold text-fifa-navy">Standings</h2>
             </div>
-            {dataError && <p className="text-red-600 text-sm mb-2">{dataError}</p>}
             <div className="overflow-x-auto bg-white rounded-lg border">
               <table className="w-full">
                 <thead>

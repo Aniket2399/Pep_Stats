@@ -122,7 +122,7 @@ def envelope(cache, key, ttl, fetch_fn, mock):
 @app.get("/matches")
 def get_matches():
     return envelope(cache, "wc:matches", 45,
-                    football.get_matches,
+                    lambda: football.get_matches(),
                     {"live": [], "upcoming": [], "recent": []})
 
 @app.get("/match/{mid}")
@@ -141,11 +141,11 @@ def get_match_events_wc(mid: int):
 
 @app.get("/standings")
 def get_standings():
-    return envelope(cache, "wc:standings", 3600, football.get_standings, [])
+    return envelope(cache, "wc:standings", 3600, lambda: football.get_standings(), [])
 
 @app.get("/leaderboards")
 def get_leaderboards():
-    return envelope(cache, "wc:scorers", 21600, football.get_topscorers, [])
+    return envelope(cache, "wc:scorers", 21600, lambda: football.get_topscorers(), [])
 
 
 # ============================================================================

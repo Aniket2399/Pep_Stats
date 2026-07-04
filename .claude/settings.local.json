@@ -39,7 +39,10 @@
       "Bash(pip show *)",
       "Bash(npx tsc *)",
       "Bash(echo \"EXIT:$?\")",
-      "Bash(echo \"exit: $?\")"
+      "Bash(echo \"exit: $?\")",
+      "Bash(grep -E 'Uvicorn running|Football data client|Sentiment|error|Error' __TRACKED_VAR__/wc_main.log)",
+      "Bash(curl -s http://localhost:8000/matches)",
+      "Bash(python3 -c \"import os; print\\('in env:', bool\\(os.getenv\\('FOOTBALL_API_KEY'\\)\\)\\)\")"
     ]
   }
 }

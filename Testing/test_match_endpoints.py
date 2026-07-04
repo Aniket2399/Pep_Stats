@@ -115,3 +115,11 @@ def test_matches_endpoint_mock_on_failure(monkeypatch):
     body = c.get("/matches").json()
     assert body["source"] == "mock"
     assert body["data"] == {"live": [], "upcoming": [], "recent": []}
+
+
+def test_matches_endpoint_mock_when_client_none(monkeypatch):
+    from api import main
+    monkeypatch.setattr(main, "cache", make_cache())
+    monkeypatch.setattr(main, "football", None)
+    r = TestClient(main.app).get("/matches")
+    assert r.status_code == 200 and r.json()["source"] == "mock"
