@@ -1,0 +1,37 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(./venv/bin/python api/database.py)",
+      "Bash(docker exec *)",
+      "Bash(./venv/bin/python -c \"import psycopg2; c=psycopg2.connect\\(host='::1',port=5432,user='annie',dbname='postgres',connect_timeout=5\\); cur=c.cursor\\(\\); cur.execute\\('select rolname from pg_roles'\\); print\\('native roles:',[r[0] for r in cur.fetchall\\(\\)]\\)\")",
+      "Bash(docker compose *)",
+      "Bash(./venv/bin/python processing/sentiment_analyzer.py)",
+      "Bash(./venv/bin/python -m spacy download en_core_web_sm)",
+      "Bash(./venv/bin/python -c \"import spacy; nlp=spacy.load\\('en_core_web_sm'\\); print\\('LOADED OK', nlp.meta['name']\\)\")",
+      "Bash(./venv/bin/python -c \"import spacy; print\\('spacy', spacy.__version__\\)\")",
+      "Bash(./venv/bin/pip install *)",
+      "Bash(./venv/bin/python \"/private/tmp/claude-501/-Users-annie-Documents-All-Projects-FIFA-Data-Project/b3c0a69e-bd50-4430-b4f0-decc2edfe597/scratchpad/test_sentiment_kafka.py\")",
+      "Bash(timeout 20 ./venv/bin/python api/main.py)",
+      "Bash(./venv/bin/pip list *)",
+      "Bash(./venv/bin/python -c ' *)",
+      "Bash(curl -s http://localhost:8000/health)",
+      "Bash(curl -s http://localhost:8000/status)",
+      "Bash(curl -s -X POST http://localhost:8000/sentiment/analyze -H \"Content-Type: application/json\" -d '{\"text\":\"GOOOAAL MBAPPE!!!\",\"source\":\"twitter\",\"match_id\":1}')",
+      "Bash(curl -s -X POST http://localhost:8000/predictions/match -H \"Content-Type: application/json\" -d '{\"team1_stats\":{\"match_id\":1,\"team\":\"France\",\"possession\":58,\"shots\":12,\"shots_on_target\":6,\"passes\":500,\"pass_accuracy\":88,\"fouls\":8,\"corners\":5,\"cards\":1},\"team2_stats\":{\"match_id\":1,\"team\":\"Argentina\",\"possession\":42,\"shots\":8,\"shots_on_target\":3,\"passes\":400,\"pass_accuracy\":82,\"fouls\":11,\"corners\":3,\"cards\":2}}')",
+      "Bash(pkill -f \"api/main.py\")",
+      "Bash(npm install *)",
+      "Bash(npm view *)",
+      "Bash(curl -s -o /dev/null -w \"HTTP %{http_code}\\\\n\" http://localhost:5173/)",
+      "Bash(curl -s \"http://localhost:5173/src/App.tsx\" -o /dev/null -w \"HTTP %{http_code}\\\\n\")",
+      "WebFetch(domain:docs.football-data.org)",
+      "WebSearch",
+      "Bash(cd *)",
+      "Bash(./venv/bin/python -c \"import httpx, starlette; print\\('httpx', httpx.__version__\\)\")",
+      "Bash(git init *)",
+      "Bash(git add *)",
+      "Bash(grep -E \"venv/|node_modules/|^\\\\S\\\\S \\\\.env$|\\\\.DS_Store\")",
+      "Bash(git -c user.name='Claude' -c user.email='noreply@anthropic.com' commit -q -m \"chore: baseline before real-time WC data feature\")",
+      "Bash(git checkout *)"
+    ]
+  }
+}
