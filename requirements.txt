@@ -47,3 +47,5 @@ pytest==7.4.0
 black==23.7.0
 flake8==6.0.0
 pytest-asyncio==0.21.1
+fakeredis==2.36.2
+httpx==0.28.1
