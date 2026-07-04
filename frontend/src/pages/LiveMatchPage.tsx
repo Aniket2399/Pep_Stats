@@ -4,7 +4,7 @@ import MatchCard from '@components/MatchCard';
 
 export default function LiveMatchPage() {
   const { id } = useParams();
-  const matchId = id ? parseInt(id, 10) : undefined;
+  const matchId = id && !Number.isNaN(Number(id)) ? parseInt(id, 10) : undefined;
   const { match, events, loading, error } = useMatchData(matchId);
 
   return (

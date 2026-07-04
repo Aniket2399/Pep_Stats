@@ -43,10 +43,11 @@ export default function TournamentPage() {
   const { live, upcoming, recent, source, loading: matchesLoading, error: matchesError } = useMatches();
   const [standings, setStandings] = useState<StandingRow[]>([]);
   const [scorers, setScorers] = useState<Scorer[]>([]);
+  const [dataError, setDataError] = useState<string | null>(null);
 
   useEffect(() => {
-    axios.get(ENDPOINTS.standings).then(r => setStandings(r.data.data)).catch(() => {});
-    axios.get(ENDPOINTS.leaderboards).then(r => setScorers(r.data.data)).catch(() => {});
+    axios.get(ENDPOINTS.standings).then(r => setStandings(r.data.data)).catch(() => setDataError('Could not load standings / scorers'));
+    axios.get(ENDPOINTS.leaderboards).then(r => setScorers(r.data.data)).catch(() => setDataError('Could not load standings / scorers'));
   }, []);
 
   const heroMatches = live.length > 0
@@ -109,6 +110,7 @@ export default function TournamentPage() {
               <Trophy className="text-fifa-gold" size={28} />
               <h2 className="text-2xl font-bold text-fifa-navy">Standings</h2>
             </div>
+            {dataError && <p className="text-red-600 text-sm mb-2">{dataError}</p>}
             <div className="overflow-x-auto bg-white rounded-lg border">
               <table className="w-full">
                 <thead>

@@ -32,6 +32,7 @@ export function useMatchData(matchId?: number) {
 
   const fetchMatch = useCallback(async (id: number) => {
     try {
+      setLoading(true);
       setError(null);
       const [matchRes, evRes] = await Promise.all([
         axios.get(ENDPOINTS.match(id), { timeout: 10000 }),
@@ -47,7 +48,7 @@ export function useMatchData(matchId?: number) {
   }, []);
 
   useEffect(() => {
-    if (!matchId) return;
+    if (!matchId) { setLoading(false); setMatch(null); return; }
     fetchMatch(matchId);
   }, [matchId, fetchMatch]);
 

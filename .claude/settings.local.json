@@ -31,7 +31,15 @@
       "Bash(git add *)",
       "Bash(grep -E \"venv/|node_modules/|^\\\\S\\\\S \\\\.env$|\\\\.DS_Store\")",
       "Bash(git -c user.name='Claude' -c user.email='noreply@anthropic.com' commit -q -m \"chore: baseline before real-time WC data feature\")",
-      "Bash(git checkout *)"
+      "Bash(git checkout *)",
+      "Bash(./venv/bin/pip show *)",
+      "Bash(./venv/bin/python *)",
+      "Bash(git *)",
+      "Bash(/Users/annie/Documents/All_Projects/FIFA_Data_Project/venv/bin/python -c \"import fakeredis; print\\('ok'\\)\")",
+      "Bash(pip show *)",
+      "Bash(npx tsc *)",
+      "Bash(echo \"EXIT:$?\")",
+      "Bash(echo \"exit: $?\")"
     ]
   }
 }
