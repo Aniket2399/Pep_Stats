@@ -18,8 +18,6 @@ export const ENDPOINTS = {
   // Matches
   matches: `${API_BASE_URL}/matches`,
   match: (id: number) => `${API_BASE_URL}/match/${id}`,
-  matchStats: (id: number) => `${API_BASE_URL}/match/${id}/stats`,
-  matchPossession: (id: number) => `${API_BASE_URL}/match/${id}/possession`,
   matchEvents: (id: number) => `${API_BASE_URL}/match/${id}/events`,
   
   // Analytics
