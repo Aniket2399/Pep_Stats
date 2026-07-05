@@ -8,11 +8,11 @@ def _standings(matches: pd.DataFrame) -> pd.DataFrame:
     rows = []
     for _, m in matches.iterrows():
         hs, as_ = m["home_score"], m["away_score"]
-        for tid, team, gf, ga in [(m["home_team_id"], m["home_team"], hs, as_),
-                                  (m["away_team_id"], m["away_team"], as_, hs)]:
-            rows.append({"team_id": tid, "team": team, "gf": gf, "ga": ga,
+        for team, gf, ga in [(m["home_team"], hs, as_),
+                              (m["away_team"], as_, hs)]:
+            rows.append({"team": team, "gf": gf, "ga": ga,
                          "win": int(gf > ga), "draw": int(gf == ga), "loss": int(gf < ga)})
-    df = pd.DataFrame(rows).groupby(["team_id", "team"], as_index=False).agg(
+    df = pd.DataFrame(rows).groupby("team", as_index=False).agg(
         matches=("gf", "size"), wins=("win", "sum"), draws=("draw", "sum"),
         losses=("loss", "sum"), gf=("gf", "sum"), ga=("ga", "sum"))
     df["points"] = df["wins"] * 3 + df["draws"]
@@ -22,6 +22,10 @@ def _standings(matches: pd.DataFrame) -> pd.DataFrame:
 def build_team_season(master: pd.DataFrame, matches: pd.DataFrame) -> pd.DataFrame:
     ev = master
     table = _standings(matches)
+    # team_id has no place in a name-only matches frame; derive it from the
+    # events, which carry both team (name) and team_id per statsbombpy.
+    team_ids = master[["team", "team_id"]].drop_duplicates()
+    table = table.merge(team_ids, on="team", how="left")
 
     shots = ev[ev["type"] == "Shot"]
     xg_for = shots.groupby("team_id")["shot_statsbomb_xg"].sum().rename("xg_for")

@@ -30,8 +30,7 @@ def raw_events(match_id: int, rows: list[dict]) -> pd.DataFrame:
 def matches_df(rows: list[dict]) -> pd.DataFrame:
     """Synthetic matches metadata frame (subset of statsbombpy columns we use)."""
     cols = ["match_id", "match_date", "match_week", "competition_id", "season_id",
-            "home_team_id", "home_team", "away_team_id", "away_team",
-            "home_score", "away_score"]
+            "home_team", "away_team", "home_score", "away_score"]
     df = pd.DataFrame(rows)
     for c in cols:
         if c not in df.columns:

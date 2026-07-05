@@ -60,6 +60,11 @@ def build_player_season(master: pd.DataFrame) -> pd.DataFrame:
     shot_xg = shots.set_index("id")["shot_statsbomb_xg"]
     passes = passes.copy()
     passes["assisted_xg"] = passes["pass_assisted_shot_id"].map(shot_xg).fillna(0.0)
+    # statsbombpy ships pass_goal_assist as an object column (True / None, not
+    # True/False), which makes groupby().sum() return a mixed bool/float object
+    # column that pyarrow can't write to parquet ("Expected integer, got bool").
+    # Coerce to a real boolean before summing.
+    passes["pass_goal_assist"] = passes["pass_goal_assist"].fillna(False).astype(bool)
 
     key_idx = pd.MultiIndex.from_frame(ev.dropna(subset=key)[key].drop_duplicates())
 

@@ -21,11 +21,11 @@ def clean(events_by_match: dict, matches: pd.DataFrame) -> pd.DataFrame:
     # passes (also avoids a KeyError on a null match_id before validation runs:
     # the merge just leaves NaN context, and the null-match_id check below raises
     # the intended ValueError instead).
-    mm = matches[["match_id", "home_team_id", "home_team", "away_team_id", "away_team", "match_date"]]
+    mm = matches[["match_id", "home_team", "away_team", "match_date"]]
     ev = ev.merge(mm, on="match_id", how="left")
-    ev["is_home"] = ev["team_id"] == ev["home_team_id"]
+    ev["is_home"] = ev["team"] == ev["home_team"]
     ev["opponent"] = np.where(ev["is_home"], ev["away_team"], ev["home_team"])
-    ev = ev.drop(columns=["home_team_id", "home_team", "away_team_id", "away_team"])
+    ev = ev.drop(columns=["home_team", "away_team"])
     ev["season_id"] = config.SEASON_ID
 
     _split_xy(ev, "location", "location_x", "location_y")
