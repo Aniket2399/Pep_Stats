@@ -13,6 +13,8 @@ def build_shots(master: pd.DataFrame) -> pd.DataFrame:
         "minute": s["minute"],
         "location_x": s["location_x"],
         "location_y": s["location_y"],
+        "shot_end_x": s["shot_end_x"],
+        "shot_end_y": s["shot_end_y"],
         "shot_statsbomb_xg": s["shot_statsbomb_xg"],
         "outcome": s["shot_outcome"],
         "body_part": s["shot_body_part"],

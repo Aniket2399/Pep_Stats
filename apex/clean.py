@@ -1,5 +1,6 @@
 """Clean stage: raw events -> immutable tidy master (data/processed/events.parquet)."""
 import logging
+import numpy as np
 import pandas as pd
 from . import config
 
@@ -16,17 +17,15 @@ def clean(events_by_match: dict, matches: pd.DataFrame) -> pd.DataFrame:
               for mid, df in events_by_match.items()]
     ev = pd.concat(frames, ignore_index=True)
 
-    # match context lookup
-    mm = matches.set_index("match_id")
-    def _ctx(row, field):
-        m = mm.loc[row["match_id"]]
-        home = row["team_id"] == m["home_team_id"]
-        if field == "is_home": return bool(home)
-        if field == "opponent": return m["away_team"] if home else m["home_team"]
-        if field == "match_date": return m["match_date"]
-    ev["is_home"] = ev.apply(lambda r: _ctx(r, "is_home"), axis=1)
-    ev["opponent"] = ev.apply(lambda r: _ctx(r, "opponent"), axis=1)
-    ev["match_date"] = ev.apply(lambda r: _ctx(r, "match_date"), axis=1)
+    # match context lookup — one vectorized merge instead of three per-row .apply
+    # passes (also avoids a KeyError on a null match_id before validation runs:
+    # the merge just leaves NaN context, and the null-match_id check below raises
+    # the intended ValueError instead).
+    mm = matches[["match_id", "home_team_id", "home_team", "away_team_id", "away_team", "match_date"]]
+    ev = ev.merge(mm, on="match_id", how="left")
+    ev["is_home"] = ev["team_id"] == ev["home_team_id"]
+    ev["opponent"] = np.where(ev["is_home"], ev["away_team"], ev["home_team"])
+    ev = ev.drop(columns=["home_team_id", "home_team", "away_team_id", "away_team"])
     ev["season_id"] = config.SEASON_ID
 
     _split_xy(ev, "location", "location_x", "location_y")

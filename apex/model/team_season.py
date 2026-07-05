@@ -40,22 +40,31 @@ def build_team_season(master: pd.DataFrame, matches: pd.DataFrame) -> pd.DataFra
             shots_against[t] = shots_against.get(t, 0) + sum(totals_n.get(o, 0) for o in opp)
 
     passes = ev[ev["type"] == "Pass"]
-    passes_by_team = passes.groupby("team_id").size()
-    total_passes = passes_by_team.sum()
-    possession = (passes_by_team / total_passes * 100).rename("possession_pct")
 
     # PPDA per team: opponent passes in pressing zone / own defensive actions in zone
+    # possession_pct per team: team's own passes / total passes in the matches THAT
+    # TEAM played (not the league-wide pass total, which would dilute/inflate it
+    # depending on how many matches other teams contributed).
     def_types = ["Duel", "Interception", "Pressure", "Foul Committed"]
     ppda = {}
+    possession = {}
     for t in table["team_id"]:
+        # matches where t played
+        t_matches = set(master[master.team_id == t]["match_id"].unique())
+
+        match_passes = passes[passes["match_id"].isin(t_matches)]
+        team_passes_n = len(match_passes[match_passes["team_id"] == t])
+        total_passes_n = len(match_passes)
+        possession[t] = (team_passes_n / total_passes_n * 100) if total_passes_n else float("nan")
+
         opp_passes = passes[(passes["team_id"] != t) & (passes["location_x"] >= config.PPDA_ZONE_X)]
         # count only opp passes in matches where t played
-        t_matches = set(master[master.team_id == t]["match_id"].unique())
         opp_passes = opp_passes[opp_passes["match_id"].isin(t_matches)]
         def_actions = ev[(ev["team_id"] == t) & (ev["type"].isin(def_types))
                          & (ev["location_x"] >= config.PPDA_ZONE_X)]
         n_def = len(def_actions)
         ppda[t] = (len(opp_passes) / n_def) if n_def else float("nan")
+    possession = pd.Series(possession, name="possession_pct", dtype="float64")
 
     out = (table.set_index("team_id")
            .join(xg_for).join(shots_for)

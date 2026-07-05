@@ -36,3 +36,28 @@ def test_ppda_ratio():
     rows.append({"id": "in1", "type": "Interception", "team": "H", "team_id": 1, "location": [70.0, 40.0]})
     out = ts.build_team_season(clean.clean({1: raw_events(1, rows)}, matches), matches).set_index("team_id")
     assert out.loc[1, "ppda"] == 2.0     # 4 opponent passes / 2 defensive actions
+
+
+def test_possession_per_team_matches():
+    # Two INDEPENDENT matches (teams 1&2 in match 1, teams 3&4 in match 2).
+    # Regression for CRITICAL-2: possession_pct must be team passes / passes in that
+    # team's OWN matches, not diluted by league-wide passes across unrelated matches.
+    matches = matches_df([
+        {"match_id": 1, "match_date": "2016-01-01", "match_week": 1,
+         "home_team_id": 1, "home_team": "H1", "away_team_id": 2, "away_team": "A1",
+         "home_score": 0, "away_score": 0},
+        {"match_id": 2, "match_date": "2016-01-02", "match_week": 1,
+         "home_team_id": 3, "home_team": "H2", "away_team_id": 4, "away_team": "A2",
+         "home_score": 0, "away_score": 0},
+    ])
+    rows1 = [{"id": f"m1h{i}", "type": "Pass", "team": "H1", "team_id": 1,
+              "location": [50.0, 40.0]} for i in range(8)]
+    rows1 += [{"id": f"m1a{i}", "type": "Pass", "team": "A1", "team_id": 2,
+               "location": [50.0, 40.0]} for i in range(2)]
+    rows2 = [{"id": f"m2h{i}", "type": "Pass", "team": "H2", "team_id": 3,
+              "location": [50.0, 40.0]} for i in range(50)]
+    master = clean.clean({1: raw_events(1, rows1), 2: raw_events(2, rows2)}, matches)
+    out = ts.build_team_season(master, matches).set_index("team_id")
+    # team 1 made 8 of 10 passes in ITS match (match 1) -> ~80%, not diluted by
+    # match 2's 50 passes (which would give 8/60 ≈ 13.3% under the old bug).
+    assert round(out.loc[1, "possession_pct"]) == 80

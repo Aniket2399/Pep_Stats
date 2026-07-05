@@ -88,3 +88,44 @@ def test_percentile_ranks_eligible_players():
     assert p11.position_group == "FWD"
     assert p10.xg_per90 > p11.xg_per90
     assert p10.percentile_xg_per90 > p11.percentile_xg_per90
+
+
+def test_player_with_two_teams_split():
+    # player_id=10 plays for team 1 in match 1 (1 goal) and team 3 in match 2 (2 goals).
+    # Regression for CRITICAL-1: aggregation must key on (player_id, team_id), not
+    # player_id alone, so stats are attributed to the right team, not pooled/duplicated.
+    matches = matches_df([
+        {"match_id": 1, "match_date": "2016-01-01", "match_week": 1,
+         "home_team_id": 1, "home_team": "H1", "away_team_id": 2, "away_team": "A1",
+         "home_score": 1, "away_score": 0},
+        {"match_id": 2, "match_date": "2016-01-02", "match_week": 1,
+         "home_team_id": 3, "home_team": "H2", "away_team_id": 4, "away_team": "A2",
+         "home_score": 2, "away_score": 0},
+    ])
+    ev1 = raw_events(1, [
+        {"id": "sx1", "type": "Starting XI", "team": "H1", "team_id": 1,
+         "minute": 0, "tactics": _tactics([10])},
+        {"id": "sh1", "type": "Shot", "team": "H1", "team_id": 1,
+         "player": "P10", "player_id": 10, "position": "Center Forward",
+         "location": [110.0, 40.0], "shot_statsbomb_xg": 0.5, "shot_outcome": "Goal"},
+    ])
+    ev2 = raw_events(2, [
+        {"id": "sx2", "type": "Starting XI", "team": "H2", "team_id": 3,
+         "minute": 0, "tactics": _tactics([10])},
+        {"id": "sh2a", "type": "Shot", "team": "H2", "team_id": 3,
+         "player": "P10", "player_id": 10, "position": "Center Forward",
+         "location": [110.0, 40.0], "shot_statsbomb_xg": 0.3, "shot_outcome": "Goal"},
+        {"id": "sh2b", "type": "Shot", "team": "H2", "team_id": 3,
+         "player": "P10", "player_id": 10, "position": "Center Forward",
+         "location": [112.0, 40.0], "shot_statsbomb_xg": 0.4, "shot_outcome": "Goal"},
+    ])
+    master = clean.clean({1: ev1, 2: ev2}, matches)
+    out = ps.build_player_season(master)
+    rows = out[out.player_id == 10]
+    assert len(rows) == 2                     # one row per (player_id, team_id), not pooled
+    r_team1 = rows[rows.team_id == 1].iloc[0]
+    r_team3 = rows[rows.team_id == 3].iloc[0]
+    assert r_team1.goals == 1
+    assert r_team3.goals == 2
+    assert r_team1.team == "H1"
+    assert r_team3.team == "H2"

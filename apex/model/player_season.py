@@ -11,24 +11,29 @@ def compute_minutes(master: pd.DataFrame) -> pd.DataFrame:
     records = {}   # (player_id, team_id) -> minutes
     apps = {}
     for match_id, mev in master.groupby("match_id"):
-        match_end = float(mev["minute"].max() or 0)
+        m = mev["minute"].max()
+        match_end = 0.0 if pd.isna(m) else float(m)
         # starters from Starting XI tactics
         on = {}   # player_id -> (team_id, start_minute)
         for _, r in mev[mev["type"] == "Starting XI"].iterrows():
             tac = r["tactics"] or {}
             for item in tac.get("lineup", []):
-                pid = item["player"]["id"]
+                pid = int(item["player"]["id"])
                 on[pid] = (r["team_id"], 0.0)
         # substitutions: player off, replacement on
+        # NOTE: sent-off (red card) players are not removed from `on` early here;
+        # their minutes run to their next substitution or match end regardless of
+        # dismissal (documented, spec-tolerated limitation).
         for _, r in mev[mev["type"] == "Substitution"].sort_values("minute").iterrows():
             minute = float(r["minute"])
             off_pid = r["player_id"]
+            off_pid = int(off_pid) if pd.notna(off_pid) else off_pid
             if off_pid in on:
                 tid, start = on.pop(off_pid)
                 _add(records, apps, off_pid, tid, minute - start)
             rep = r["substitution_replacement_id"]
-            if rep is not None:
-                on[rep] = (r["team_id"], minute)
+            if pd.notna(rep):
+                on[int(rep)] = (r["team_id"], minute)
         # anyone still on played to match end
         for pid, (tid, start) in on.items():
             _add(records, apps, pid, tid, match_end - start)
@@ -44,12 +49,10 @@ def _add(records, apps, pid, tid, mins):
 def build_player_season(master: pd.DataFrame) -> pd.DataFrame:
     ev = master
     mins = compute_minutes(ev)
+    key = ["player_id", "team_id"]
 
-    # per-player raw aggregates (attributed to the player's own events)
-    def agg(df, **named):
-        g = df.groupby("player_id")
-        return pd.DataFrame({name: fn(g) for name, fn in named.items()})
-
+    # per-(player, team) raw aggregates (attributed to the player's own events,
+    # keyed by team so a player who appears for two teams gets one row per team)
     shots = ev[ev["type"] == "Shot"]
     passes = ev[ev["type"] == "Pass"]
     goals = shots[shots["shot_outcome"] == "Goal"]
@@ -58,39 +61,38 @@ def build_player_season(master: pd.DataFrame) -> pd.DataFrame:
     passes = passes.copy()
     passes["assisted_xg"] = passes["pass_assisted_shot_id"].map(shot_xg).fillna(0.0)
 
-    base = pd.DataFrame({"player_id": ev["player_id"].dropna().unique()})
-    def sum_by(df, col, pid_from="player_id"):
-        return df.groupby(pid_from)[col].sum()
-    def count_by(df, pid_from="player_id"):
-        return df.groupby(pid_from).size()
+    key_idx = pd.MultiIndex.from_frame(ev.dropna(subset=key)[key].drop_duplicates())
 
-    agg_df = pd.DataFrame(index=base["player_id"])
-    agg_df["goals"] = count_by(goals).reindex(agg_df.index).fillna(0)
-    agg_df["xg"] = sum_by(shots, "shot_statsbomb_xg").reindex(agg_df.index).fillna(0.0)
-    agg_df["shots"] = count_by(shots).reindex(agg_df.index).fillna(0)
-    agg_df["assists"] = sum_by(passes, "pass_goal_assist").reindex(agg_df.index).fillna(0.0)
-    agg_df["xa"] = sum_by(passes, "assisted_xg").reindex(agg_df.index).fillna(0.0)
-    agg_df["passes"] = count_by(passes).reindex(agg_df.index).fillna(0)
+    def sum_by(df, col):
+        return df.groupby(key)[col].sum()
+    def count_by(df):
+        return df.groupby(key).size()
+
+    agg_df = pd.DataFrame(index=key_idx)
+    agg_df["goals"] = count_by(goals).reindex(key_idx).fillna(0)
+    agg_df["xg"] = sum_by(shots, "shot_statsbomb_xg").reindex(key_idx).fillna(0.0)
+    agg_df["shots"] = count_by(shots).reindex(key_idx).fillna(0)
+    agg_df["assists"] = sum_by(passes, "pass_goal_assist").reindex(key_idx).fillna(0.0)
+    agg_df["xa"] = sum_by(passes, "assisted_xg").reindex(key_idx).fillna(0.0)
+    agg_df["passes"] = count_by(passes).reindex(key_idx).fillna(0)
     prog = passes[(passes["pass_end_x"].fillna(0) - passes["location_x"].fillna(0)) >= 10]
-    agg_df["prog_passes"] = count_by(prog).reindex(agg_df.index).fillna(0)
-    agg_df["pressures"] = count_by(ev[ev["type"] == "Pressure"]).reindex(agg_df.index).fillna(0)
-    agg_df["tackles"] = count_by(ev[ev["type"] == "Duel"]).reindex(agg_df.index).fillna(0)
-    agg_df["interceptions"] = count_by(ev[ev["type"] == "Interception"]).reindex(agg_df.index).fillna(0)
+    agg_df["prog_passes"] = count_by(prog).reindex(key_idx).fillna(0)
+    agg_df["pressures"] = count_by(ev[ev["type"] == "Pressure"]).reindex(key_idx).fillna(0)
+    agg_df["tackles"] = count_by(ev[ev["type"] == "Duel"]).reindex(key_idx).fillna(0)
+    agg_df["interceptions"] = count_by(ev[ev["type"] == "Interception"]).reindex(key_idx).fillna(0)
 
-    # identity: team, name, primary position (most frequent non-null position)
-    ident = (ev.dropna(subset=["player_id"])
-               .groupby("player_id")
-               .agg(player=("player", "first"), team_id=("team_id", "first"),
-                    team=("team", "first")))
-    pos = (ev.dropna(subset=["player_id", "position"])
-             .groupby("player_id")["position"]
+    # identity: name, team, primary position (most frequent non-null position),
+    # keyed by (player_id, team_id) so a player's stint at each team is separate
+    ident = (ev.dropna(subset=key)
+               .groupby(key)
+               .agg(player=("player", "first"), team=("team", "first")))
+    pos = (ev.dropna(subset=key + ["position"])
+             .groupby(key)["position"]
              .agg(lambda s: s.mode().iloc[0] if not s.mode().empty else None))
     ident["primary_position"] = pos
     ident["position_group"] = ident["primary_position"].map(config.position_group)
 
-    out = ident.join(agg_df).reset_index().merge(mins, on="player_id", how="left")
-    out["team_id"] = out["team_id_x"].fillna(out.get("team_id_y")) if "team_id_x" in out else out["team_id"]
-    out = out.drop(columns=[c for c in ["team_id_x", "team_id_y"] if c in out.columns], errors="ignore")
+    out = ident.join(agg_df).reset_index().merge(mins, on=key, how="left")
     out["minutes"] = out["minutes"].fillna(0.0)
     out["appearances"] = out["appearances"].fillna(0).astype(int)
 
