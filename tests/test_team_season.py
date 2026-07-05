@@ -24,6 +24,10 @@ def test_team_season_standings_and_xg():
     assert round(out.loc[1, "possession_pct"]) == 67                 # 2 of 3 passes
 
 def test_ppda_ratio():
+    # PPDA zones are physical, not per-team-relative: every event is recorded in
+    # the direction the acting team attacks, so "the same physical strip" is
+    # location_x <= 72 (120 - PPDA_ZONE_X) for the opponent's build-up, and
+    # location_x >= 48 (PPDA_ZONE_X) for the pressing team's defensive actions.
     matches = matches_df([{ "match_id": 1, "match_date": "2016-01-01", "match_week": 1,
         "home_team_id": 1, "home_team": "H", "away_team_id": 2, "away_team": "A",
         "home_score": 0, "away_score": 0}])
@@ -31,11 +35,15 @@ def test_ppda_ratio():
     rows = []
     for i in range(4):
         rows.append({"id": f"ap{i}", "type": "Pass", "team": "A", "team_id": 2,
-                     "location": [60.0, 40.0]})      # opp pass, x < zone-from-opp-side
+                     "location": [60.0, 40.0]})      # opp build-up pass, counts (<=72)
     rows.append({"id": "t1", "type": "Duel", "team": "H", "team_id": 1, "location": [60.0, 40.0]})
     rows.append({"id": "in1", "type": "Interception", "team": "H", "team_id": 1, "location": [70.0, 40.0]})
+    # discriminating case: an opponent pass deep in THEIR attacking third must NOT
+    # count toward the numerator (it's not build-up play, it's already forward).
+    rows.append({"id": "ap_attack", "type": "Pass", "team": "A", "team_id": 2,
+                 "location": [110.0, 40.0]})
     out = ts.build_team_season(clean.clean({1: raw_events(1, rows)}, matches), matches).set_index("team_id")
-    assert out.loc[1, "ppda"] == 2.0     # 4 opponent passes / 2 defensive actions
+    assert out.loc[1, "ppda"] == 2.0     # 4 opponent build-up passes / 2 defensive actions
 
 
 def test_possession_per_team_matches():

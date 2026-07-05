@@ -2,21 +2,20 @@
 import duckdb
 from . import config
 
-_TABLES = {
-    "player_season": config.PLAYER_SEASON_PARQUET,
-    "team_season": config.TEAM_SEASON_PARQUET,
-    "shots": config.SHOTS_PARQUET,
-}
+def _table_paths() -> dict:
+    # built fresh at call time (not module import time) so tests can
+    # monkeypatch config.*_PARQUET paths before calling serve().
+    return {
+        "player_season": config.PLAYER_SEASON_PARQUET,
+        "team_season": config.TEAM_SEASON_PARQUET,
+        "shots": config.SHOTS_PARQUET,
+    }
 
 def serve() -> None:
     config.SERVING_DIR.mkdir(parents=True, exist_ok=True)
     con = duckdb.connect(str(config.DUCKDB_PATH))
     try:
-        for table, path in {
-            "player_season": config.PLAYER_SEASON_PARQUET,
-            "team_season": config.TEAM_SEASON_PARQUET,
-            "shots": config.SHOTS_PARQUET,
-        }.items():
+        for table, path in _table_paths().items():
             con.execute(
                 f"CREATE OR REPLACE TABLE {table} AS "
                 f"SELECT * FROM read_parquet('{path.as_posix()}')")

@@ -87,3 +87,6 @@ yarn-error.log
 
 # macOS
 .DS_Store
+
+# Project data (raw StatsBomb parquet + duckdb, ~1.3GB — never commit)
+data/

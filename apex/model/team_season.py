@@ -49,7 +49,20 @@ def build_team_season(master: pd.DataFrame, matches: pd.DataFrame) -> pd.DataFra
     # possession_pct per team: team's own passes / total passes in the matches THAT
     # TEAM played (not the league-wide pass total, which would dilute/inflate it
     # depending on how many matches other teams contributed).
-    def_types = ["Duel", "Interception", "Pressure", "Foul Committed"]
+    #
+    # PPDA definition: every event is recorded in the attacking direction of the
+    # team executing it (both teams "attack" toward x=120 in their own events),
+    # so the opponent's build-up zone (their own defensive/middle third, low x
+    # in THEIR frame) and the pressing team's defensive/press zone (high x in
+    # THEIR frame) are two DIFFERENT numeric ranges even though they describe
+    # the same physical strip of the pitch. Numerator = opponent passes with
+    # opponent's location_x <= (120 - PPDA_ZONE_X) (their own build-up, ~60%
+    # of the pitch nearest their own goal); denominator = pressing team's
+    # defensive actions with location_x >= PPDA_ZONE_X (that team's press,
+    # ~40% from goal in their own frame) — both reference the same physical
+    # zone. Standard PPDA counts tackles/interceptions/fouls as defensive
+    # actions, not pressures, so "Pressure" is excluded from def_types.
+    def_types = ["Duel", "Interception", "Foul Committed"]
     ppda = {}
     possession = {}
     for t in table["team_id"]:
@@ -61,7 +74,8 @@ def build_team_season(master: pd.DataFrame, matches: pd.DataFrame) -> pd.DataFra
         total_passes_n = len(match_passes)
         possession[t] = (team_passes_n / total_passes_n * 100) if total_passes_n else float("nan")
 
-        opp_passes = passes[(passes["team_id"] != t) & (passes["location_x"] >= config.PPDA_ZONE_X)]
+        opp_passes = passes[(passes["team_id"] != t)
+                             & (passes["location_x"] <= (120 - config.PPDA_ZONE_X))]
         # count only opp passes in matches where t played
         opp_passes = opp_passes[opp_passes["match_id"].isin(t_matches)]
         def_actions = ev[(ev["team_id"] == t) & (ev["type"].isin(def_types))

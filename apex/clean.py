@@ -7,8 +7,11 @@ from . import config
 logger = logging.getLogger(__name__)
 
 def _split_xy(df: pd.DataFrame, src: str, x: str, y: str) -> None:
-    def _x(v): return v[0] if isinstance(v, (list, tuple)) and len(v) >= 2 else None
-    def _y(v): return v[1] if isinstance(v, (list, tuple)) and len(v) >= 2 else None
+    # statsbombpy's location fields come back as numpy.ndarray after a parquet
+    # round-trip (not just list/tuple) — must accept ndarrays too or every
+    # location column silently goes null on real data.
+    def _x(v): return v[0] if isinstance(v, (list, tuple, np.ndarray)) and len(v) >= 2 else None
+    def _y(v): return v[1] if isinstance(v, (list, tuple, np.ndarray)) and len(v) >= 2 else None
     df[x] = df[src].map(_x)
     df[y] = df[src].map(_y)
 

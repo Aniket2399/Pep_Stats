@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd, pytest
 from apex import clean
 from tests.synthetic import raw_events, matches_df
@@ -28,6 +29,24 @@ def test_clean_raises_on_shot_without_xg():
                            "location": [100.0, 40.0], "shot_statsbomb_xg": None}])
     with pytest.raises(ValueError, match="xg"):
         clean.clean({101: ev}, _matches())
+
+def test_split_xy_handles_numpy_arrays():
+    # statsbombpy returns location fields as numpy.ndarray (not list/tuple) after
+    # a parquet round-trip. Regression for CRITICAL-1: the isinstance guard in
+    # _split_xy must also accept np.ndarray or every location column goes null.
+    ev = raw_events(101, [
+        {"id": "a", "type": "Pass", "team": "Barcelona", "team_id": 1, "player": "X",
+         "player_id": 10, "location": np.array([61.0, 40.1]),
+         "pass_end_location": np.array([59.3, 42.3])},
+    ])
+    master = clean.clean({101: ev}, _matches())
+    row = master[master.id == "a"].iloc[0]
+    assert row.location_x == 61.0
+    assert row.location_y == 40.1
+    assert pd.notna(row.pass_end_x)
+    assert pd.notna(row.pass_end_y)
+    assert row.pass_end_x == 59.3
+    assert row.pass_end_y == 42.3
 
 def test_clean_raises_on_duplicate_id():
     ev = raw_events(101, [
