@@ -10,26 +10,26 @@ export function useAsync<T>(
   const [data, setData] = useState<T | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<Error | null>(null)
+  const [tick, setTick] = useState(0)
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const run = useCallback(fn, deps)
 
-  const load = useCallback(() => {
-    let cancelled = false
-    setLoading(true)
-    run()
-      .then((d) => { if (!cancelled) { setData(d); setError(null) } })
-      .catch((e) => { if (!cancelled) setError(e as Error) })
-      .finally(() => { if (!cancelled) setLoading(false) })
-    return () => { cancelled = true }
-  }, [run])
+  const reload = useCallback(() => setTick((t) => t + 1), [])
 
   useEffect(() => {
-    const cancel = load()
-    let timer: ReturnType<typeof setInterval> | undefined
-    if (opts.pollMs) timer = setInterval(() => load(), opts.pollMs)
-    return () => { cancel(); if (timer) clearInterval(timer) }
-  }, [load, opts.pollMs])
+    let cancelled = false
+    const load = () => {
+      setLoading(true)
+      run()
+        .then((d) => { if (!cancelled) { setData(d); setError(null) } })
+        .catch((e) => { if (!cancelled) setError(e as Error) })
+        .finally(() => { if (!cancelled) setLoading(false) })
+    }
+    load()
+    const timer = opts.pollMs ? setInterval(load, opts.pollMs) : undefined
+    return () => { cancelled = true; if (timer) clearInterval(timer) }
+  }, [run, opts.pollMs, tick])
 
-  return { data, loading, error, reload: load }
+  return { data, loading, error, reload }
 }

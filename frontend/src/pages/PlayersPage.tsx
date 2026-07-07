@@ -26,7 +26,8 @@ export default function PlayersPage() {
           <option value="">All clubs</option>
           {(clubs.data ?? []).map((c) => <option key={c.team_id} value={c.team_id}>{c.team}</option>)}
         </select>
-        <select className="border rounded px-2 py-1" value={pos} onChange={(e) => setPos(e.target.value)}>
+        <select className="border rounded px-2 py-1" value={pos}
+                onChange={(e) => { setPos(e.target.value); setPlayerId(undefined) }}>
           {POSITIONS.map((p) => <option key={p} value={p}>{p}</option>)}
         </select>
       </div>
@@ -38,6 +39,7 @@ export default function PlayersPage() {
         : <Empty message="No players for this filter." />)}
 
       {playerId && detail.loading && <Loading />}
+      {detail.error && <ErrorState error={detail.error} onRetry={detail.reload} />}
       {detail.data && <PlayerDetail player={detail.data} shots={shots.data ?? []} />}
     </div>
   )
