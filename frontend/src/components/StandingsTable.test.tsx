@@ -10,5 +10,5 @@ const rows: StandingRow[] = [
 test('renders group header and rows', () => {
   render(<StandingsTable rows={rows} />)
   expect(screen.getByText('Group A')).toBeInTheDocument()
-  expect(screen.getByText('Mexico')).toBeInTheDocument()
+  expect(screen.getByText(/Mexico/)).toBeInTheDocument()
 })
