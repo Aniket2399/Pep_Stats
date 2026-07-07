@@ -41,8 +41,10 @@ OVERLAY = (
 # `this.wcStd=teams.map(...)` is the single point group tables are built from.
 STD_ANCHOR = "Pts:3*w+d}; });"
 STD_OVERLAY = (
-    "Pts:3*w+d}; }); try{if(window.__APEX_STD)this.wcStd.forEach(function(x){"
-    "var o=window.__APEX_STD[x.code];if(o)Object.assign(x,o);});}catch(e){}"
+    "Pts:3*w+d}; }); try{if(window.__APEX_STD){var __hit=0;this.wcStd.forEach(function(x){"
+    "var o=window.__APEX_STD[x.code];if(o){x.P=o.P;x.W=o.W;x.D=o.D;x.L=o.L;x.GF=o.GF;x.GA=o.GA;"
+    "x.GD=o.GF-o.GA;x.Pts=o.Pts;__hit++;}});console.log('[APEX] std overlay applied to',__hit,'rows');}}"
+    "catch(e){console.error('[APEX] std overlay error',e);}"
 )
 
 # --- Overlay C: make fetchLive() actually pull the live serving API, then re-render ---
@@ -50,15 +52,18 @@ FETCH_ANCHOR = "fetchLive(){ if(this._wcTried)return; this._wcTried=true;"
 FETCH_OVERLAY = (
     "fetchLive(){ if(this._wcTried)return; this._wcTried=true;"
     " try{var __b=(window.__APEX_API||'http://localhost:8000');var __self=this;"
-    "fetch(__b+'/api/live/standings').then(function(r){return r.ok?r.json():[];})"
-    ".then(function(rows){var n2c=window.__APEX_NAME2CODE||{};var std={};"
-    "(rows||[]).forEach(function(r){var c=n2c[r.team];if(c)std[c]="
-    "{P:r.played,W:r.w,D:r.d,L:r.l,GF:r.gf,GA:r.ga,Pts:r.points};});"
+    "console.log('[APEX] fetching',__b+'/api/live/standings');"
+    "fetch(__b+'/api/live/standings').then(function(r){console.log('[APEX] fetch status',r.status);return r.ok?r.json():[];})"
+    ".then(function(rows){rows=rows||[];console.log('[APEX] rows',rows.length,rows[0]);"
+    "var n2c=window.__APEX_NAME2CODE||{};var std={},miss=[];"
+    "rows.forEach(function(r){var c=n2c[r.team];if(c)std[c]="
+    "{P:r.played,W:r.w,D:r.d,L:r.l,GF:r.gf,GA:r.ga,Pts:r.points};else miss.push(r.team);});"
+    "console.log('[APEX] mapped',Object.keys(std).length,'unmapped',miss);"
     "if(Object.keys(std).length){window.__APEX_STD=std;__self._wc=null;__self._twc={};__self._wcPl=null;"
     "__self.wcState={loaded:true,live:true,lastSync:new Date().toLocaleTimeString([],"
-    "{hour:'2-digit',minute:'2-digit'}),source:'Sofascore (live via serving API)'};"
-    "console.log('[APEX] live standings:',Object.keys(std).length,'teams');}"
-    "if(__self.state.source==='wc')__self.forceUpdate();}).catch(function(){});}catch(e){}"
+    "{hour:'2-digit',minute:'2-digit'}),source:'Sofascore (live via serving API)'};}"
+    "if(__self.state.source==='wc')__self.forceUpdate();})"
+    ".catch(function(e){console.error('[APEX] fetch failed',e);});}catch(e){console.error('[APEX] fetchLive error',e);}"
 )
 
 # JSON team_metrics field -> the field names teamWC() returns.
@@ -136,8 +141,10 @@ def main() -> int:
     patched = inject(html, data)
     if patched.count("\\u002Fscript") != before:
         raise SystemExit("bundle escaping changed — refusing to write.")
-    OUT.parent.mkdir(parents=True, exist_ok=True)
-    OUT.write_text(patched, encoding="utf-8")
+    out = Path(os.environ.get("APEX_OUT", str(OUT)))
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(patched, encoding="utf-8")
+    globals().__setitem__("OUT", out)  # for the summary print below
     teams = len(build_wc_metrics(data))
     print(f"wrote {OUT.relative_to(ROOT)}  (WC metrics for {teams} teams)")
     return 0
