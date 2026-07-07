@@ -90,3 +90,4 @@ yarn-error.log
 
 # Project data (raw StatsBomb parquet + duckdb, ~1.3GB — never commit)
 data/
+dashboard/live.html
