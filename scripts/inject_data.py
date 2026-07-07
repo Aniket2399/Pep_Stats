@@ -80,13 +80,22 @@ def build_wc_metrics(data: dict) -> dict:
 API_BASE = "http://localhost:8000"  # serving API for the live World Cup tabs
 
 
+import os
+
+# WC live-standings/fetchLive wiring is opt-in (APEX_WC_LIVE=1) while it's being
+# debugged — the default (teamWC metrics only) is the known-good version.
+WC_LIVE = os.environ.get("APEX_WC_LIVE") == "1"
+
+
 def inject(html: str, data: dict) -> str:
-    # 1) three surgical overlays (raw replace preserves the bundle's escaping)
-    for name, anchor, overlay in [
-        ("teamWC (Teams metrics)", ANCHOR, OVERLAY),
-        ("wcStd (Groups standings)", STD_ANCHOR, STD_OVERLAY),
-        ("fetchLive (live API)", FETCH_ANCHOR, FETCH_OVERLAY),
-    ]:
+    overlays = [("teamWC (Teams metrics)", ANCHOR, OVERLAY)]
+    if WC_LIVE:
+        overlays += [
+            ("wcStd (Groups standings)", STD_ANCHOR, STD_OVERLAY),
+            ("fetchLive (live API)", FETCH_ANCHOR, FETCH_OVERLAY),
+        ]
+    # 1) surgical overlays (raw replace preserves the bundle's escaping)
+    for name, anchor, overlay in overlays:
         c = html.count(anchor)
         if c != 1:
             raise SystemExit(
