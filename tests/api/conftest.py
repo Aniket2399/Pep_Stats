@@ -3,6 +3,14 @@ import pandas as pd
 import pytest
 from apex import config
 
+def _duckdb_safe(df):
+    # Pandas 3.0.3 uses StringDtype by default; DuckDB 1.1.3 doesn't recognize it.
+    # Convert StringDtype columns to object for compatibility (mirrors apex/live/serve.py).
+    for col in df.columns:
+        if df[col].dtype.name == "str":
+            df[col] = df[col].astype(object)
+    return df
+
 def _build(db_path):
     con = duckdb.connect(str(db_path))
     team_season = pd.DataFrame([
@@ -87,6 +95,7 @@ def _build(db_path):
     for name, df in [("team_season", team_season), ("player_season", player_season),
                      ("shots", shots), ("live_matches", live_matches),
                      ("fixtures", fixtures), ("standings", standings)]:
+        df = _duckdb_safe(df)
         con.register("t", df); con.execute(f"CREATE TABLE {name} AS SELECT * FROM t"); con.unregister("t")
     con.close()
 
