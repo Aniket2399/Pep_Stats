@@ -113,21 +113,19 @@ def inject(html: str, data: dict) -> str:
     #    runtime's document swap). All numbers/codes -> no '</script>'.
     metrics = data["world_cup_2026"]["team_metrics"]
     wc = build_wc_metrics(data)
-    name2code = {t["team"]: t["code"] for t in metrics}
-    globs = (
-        "window.__APEX_WC=%s;window.__APEX_NAME2CODE=%s;window.__APEX_API=%s;"
-        % (
-            json.dumps(wc, ensure_ascii=False),
+    # Known-good default injects ONLY __APEX_WC (matches the confirmed version).
+    globs = "window.__APEX_WC=%s;" % json.dumps(wc, ensure_ascii=False)
+    if WC_LIVE:
+        name2code = {t["team"]: t["code"] for t in metrics}
+        globs += "window.__APEX_NAME2CODE=%s;window.__APEX_API=%s;" % (
             json.dumps(name2code, ensure_ascii=False),
             json.dumps(API_BASE),
         )
-    )
     if "</script>" in globs:
         raise SystemExit("data contains '</script>' — would break the injected tag.")
     tag = (
-        "<script>%s console.log('[APEX] injected: WC metrics %%d, name-map %%d, api %%s',"
-        "Object.keys(window.__APEX_WC).length,Object.keys(window.__APEX_NAME2CODE).length,"
-        "window.__APEX_API);</script>" % globs
+        "<script>%s console.log('[APEX] WC metrics injected:',"
+        "Object.keys(window.__APEX_WC).length);</script>" % globs
     )
     html = html.replace("<head>", "<head>\n" + tag, 1)
     return html
@@ -144,9 +142,9 @@ def main() -> int:
     out = Path(os.environ.get("APEX_OUT", str(OUT)))
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(patched, encoding="utf-8")
-    globals().__setitem__("OUT", out)  # for the summary print below
     teams = len(build_wc_metrics(data))
-    print(f"wrote {OUT.relative_to(ROOT)}  (WC metrics for {teams} teams)")
+    mode = "live+debug" if WC_LIVE else "teamWC-only (known-good)"
+    print(f"wrote {out}  [{mode}]  (WC metrics for {teams} teams)")
     return 0
 
 
