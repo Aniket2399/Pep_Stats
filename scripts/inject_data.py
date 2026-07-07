@@ -30,11 +30,35 @@ WIREFRAME = ROOT / "docs" / "APEX XI - Football Analytics v2.html"
 DATA = ROOT / "docs" / "data" / "football_analytics_data.json"
 OUT = ROOT / "dashboard" / "index.html"
 
-# The exact tail of teamWC(code) — real values overlay the generated ones here.
+# --- Overlay A: World Cup Teams metrics (from window.__APEX_WC, JSON-sourced) ---
 ANCHOR = "str:s}; this._twc[code]=res;"
 OVERLAY = (
     "str:s}; try{if(window.__APEX_WC&&window.__APEX_WC[code])"
     "Object.assign(res,window.__APEX_WC[code]);}catch(e){} this._twc[code]=res;"
+)
+
+# --- Overlay B: World Cup standings/groups (from window.__APEX_STD, API-sourced) ---
+# `this.wcStd=teams.map(...)` is the single point group tables are built from.
+STD_ANCHOR = "Pts:3*w+d}; });"
+STD_OVERLAY = (
+    "Pts:3*w+d}; }); try{if(window.__APEX_STD)this.wcStd.forEach(function(x){"
+    "var o=window.__APEX_STD[x.code];if(o)Object.assign(x,o);});}catch(e){}"
+)
+
+# --- Overlay C: make fetchLive() actually pull the live serving API, then re-render ---
+FETCH_ANCHOR = "fetchLive(){ if(this._wcTried)return; this._wcTried=true;"
+FETCH_OVERLAY = (
+    "fetchLive(){ if(this._wcTried)return; this._wcTried=true;"
+    " try{var __b=(window.__APEX_API||'http://localhost:8000');var __self=this;"
+    "fetch(__b+'/api/live/standings').then(function(r){return r.ok?r.json():[];})"
+    ".then(function(rows){var n2c=window.__APEX_NAME2CODE||{};var std={};"
+    "(rows||[]).forEach(function(r){var c=n2c[r.team];if(c)std[c]="
+    "{P:r.played,W:r.w,D:r.d,L:r.l,GF:r.gf,GA:r.ga,Pts:r.points};});"
+    "if(Object.keys(std).length){window.__APEX_STD=std;__self._wc=null;__self._twc={};__self._wcPl=null;"
+    "__self.wcState={loaded:true,live:true,lastSync:new Date().toLocaleTimeString([],"
+    "{hour:'2-digit',minute:'2-digit'}),source:'Sofascore (live via serving API)'};"
+    "console.log('[APEX] live standings:',Object.keys(std).length,'teams');}"
+    "if(__self.state.source==='wc')__self.forceUpdate();}).catch(function(){});}catch(e){}"
 )
 
 # JSON team_metrics field -> the field names teamWC() returns.
@@ -53,25 +77,43 @@ def build_wc_metrics(data: dict) -> dict:
     return out
 
 
+API_BASE = "http://localhost:8000"  # serving API for the live World Cup tabs
+
+
 def inject(html: str, data: dict) -> str:
-    n = html.count(ANCHOR)
-    if n != 1:
-        raise SystemExit(
-            f"teamWC anchor found {n}x (expected 1). The wireframe changed; "
-            f"update ANCHOR in {__file__}."
-        )
-    # 1) surgical overlay (raw replace preserves the bundle's escaping)
-    html = html.replace(ANCHOR, OVERLAY)
-    # 2) inject the data global right after <head> (persists on window across the
-    #    runtime's document swap). JSON here is numbers/codes only -> no </script>.
+    # 1) three surgical overlays (raw replace preserves the bundle's escaping)
+    for name, anchor, overlay in [
+        ("teamWC (Teams metrics)", ANCHOR, OVERLAY),
+        ("wcStd (Groups standings)", STD_ANCHOR, STD_OVERLAY),
+        ("fetchLive (live API)", FETCH_ANCHOR, FETCH_OVERLAY),
+    ]:
+        c = html.count(anchor)
+        if c != 1:
+            raise SystemExit(
+                f"anchor for {name} found {c}x (expected 1). The wireframe "
+                f"changed; update the anchor in {__file__}."
+            )
+        html = html.replace(anchor, overlay)
+
+    # 2) inject the data globals right after <head> (persist on window across the
+    #    runtime's document swap). All numbers/codes -> no '</script>'.
+    metrics = data["world_cup_2026"]["team_metrics"]
     wc = build_wc_metrics(data)
-    glob = json.dumps(wc, ensure_ascii=False)
-    if "</script>" in glob:
+    name2code = {t["team"]: t["code"] for t in metrics}
+    globs = (
+        "window.__APEX_WC=%s;window.__APEX_NAME2CODE=%s;window.__APEX_API=%s;"
+        % (
+            json.dumps(wc, ensure_ascii=False),
+            json.dumps(name2code, ensure_ascii=False),
+            json.dumps(API_BASE),
+        )
+    )
+    if "</script>" in globs:
         raise SystemExit("data contains '</script>' — would break the injected tag.")
     tag = (
-        "<script>window.__APEX_WC=%s;"
-        "console.log('[APEX] WC metrics injected:',Object.keys(window.__APEX_WC).length);"
-        "</script>" % glob
+        "<script>%s console.log('[APEX] injected: WC metrics %%d, name-map %%d, api %%s',"
+        "Object.keys(window.__APEX_WC).length,Object.keys(window.__APEX_NAME2CODE).length,"
+        "window.__APEX_API);</script>" % globs
     )
     html = html.replace("<head>", "<head>\n" + tag, 1)
     return html
