@@ -5,7 +5,7 @@ open data) and the **World Cup 2026** (live speed layer), built on a
 Lambda-architecture backend and a React frontend that reproduces a dark,
 FIFA-style UI.
 
-![Historic — Players heatmap](docs/Football%20Analytics%20Dashboard%20v2-selection.png)
+![PepStats — Historic Overview](docs/screenshots/historic-overview.png)
 
 ## What's inside
 
@@ -26,6 +26,17 @@ FIFA-style UI.
 - **Groups** — the 12 live group tables
 
 An **Update scores** button triggers a live refresh of the World Cup data.
+
+## Screenshots
+
+**Historic — Players (movement heatmap)**
+![Historic Players heatmap](docs/screenshots/historic-players.png)
+
+**World Cup — Bracket** (real knockout matches, winners auto-advancing)
+![World Cup Bracket](docs/screenshots/wc-bracket.png)
+
+**World Cup — Insights**
+![World Cup Insights](docs/screenshots/wc-insights.png)
 
 ## Architecture
 
