@@ -33,10 +33,12 @@ def serve(client, now_ts) -> dict:
     live = pd.DataFrame(derive_live(matches, now_ts), columns=_LIVE_COLS)
     fixtures = pd.DataFrame(derive_fixtures(matches), columns=_FIX_COLS)
     standings = pd.DataFrame(derive_standings(matches), columns=_STAND_COLS)
+    # All knockout (non-group) matches — full bracket source, not just the live window.
+    knockout = pd.DataFrame([m for m in matches if not m.get("group")], columns=_LIVE_COLS)
 
     # Pandas 3.0.3 uses StringDtype by default; DuckDB 1.1.3 doesn't recognize it.
     # Convert StringDtype columns to object for compatibility.
-    for df in [live, fixtures, standings]:
+    for df in [live, fixtures, standings, knockout]:
         for col in df.columns:
             if df[col].dtype.name == "str":
                 df[col] = df[col].astype(object)
@@ -46,10 +48,11 @@ def serve(client, now_ts) -> dict:
     try:
         # NOTE: "group" is a DuckDB reserved word (standings.group column) -
         # consumers must quote it as "group" in SQL.
-        for name, df in [("live_matches", live), ("fixtures", fixtures), ("standings", standings)]:
+        for name, df in [("live_matches", live), ("fixtures", fixtures), ("standings", standings), ("knockout", knockout)]:
             con.register("df_tmp", df)
             con.execute(f"CREATE OR REPLACE TABLE {name} AS SELECT * FROM df_tmp")
             con.unregister("df_tmp")
     finally:
         con.close()
-    return {"source": source, "live": len(live), "fixtures": len(fixtures), "standings": len(standings)}
+    return {"source": source, "live": len(live), "fixtures": len(fixtures),
+            "standings": len(standings), "knockout": len(knockout)}

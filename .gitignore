@@ -89,6 +89,11 @@ yarn-error.log
 .DS_Store
 
 # Project data (raw StatsBomb parquet + duckdb, ~1.3GB — never commit)
-data/
+# Anchored to repo root so it does NOT ignore frontend/src/data (app source).
+/data/
 dashboard/live.html
 dashboard/debug.html
+dashboard/original.html
+
+# SDD scratch (per-session progress ledger)
+.superpowers/

@@ -1,0 +1,1588 @@
+{
+  "meta": {
+    "project": "APEX XI — Football Analytics",
+    "generated": "2026-07-07",
+    "note": "Modeled/synthetic analytics for a wireframe. Historic figures follow the 2014/15 La Liga season (StatsBomb-style); World Cup 2026 metrics are deterministically generated in the ScraperFC (FBref/Sofascore/Understat) schema and are placeholders, not live scraped data."
+  },
+  "historic": {
+    "competition": "La Liga 2014/15",
+    "standings": [
+      {
+        "pos": 1,
+        "code": "BAR",
+        "team": "Barcelona",
+        "played": 38,
+        "won": 30,
+        "drawn": 4,
+        "lost": 4,
+        "gf": 110,
+        "ga": 21,
+        "gd": 89,
+        "points": 94,
+        "form": "LWWLW"
+      },
+      {
+        "pos": 2,
+        "code": "RMA",
+        "team": "Real Madrid",
+        "played": 38,
+        "won": 30,
+        "drawn": 2,
+        "lost": 6,
+        "gf": 118,
+        "ga": 38,
+        "gd": 80,
+        "points": 92,
+        "form": "WWWWW"
+      },
+      {
+        "pos": 3,
+        "code": "ATM",
+        "team": "Atlético Madrid",
+        "played": 38,
+        "won": 23,
+        "drawn": 9,
+        "lost": 6,
+        "gf": 67,
+        "ga": 29,
+        "gd": 38,
+        "points": 78,
+        "form": "LWWLL"
+      },
+      {
+        "pos": 4,
+        "code": "VAL",
+        "team": "Valencia",
+        "played": 38,
+        "won": 22,
+        "drawn": 11,
+        "lost": 5,
+        "gf": 70,
+        "ga": 32,
+        "gd": 38,
+        "points": 77,
+        "form": "WWDWW"
+      },
+      {
+        "pos": 5,
+        "code": "SEV",
+        "team": "Sevilla",
+        "played": 38,
+        "won": 23,
+        "drawn": 7,
+        "lost": 8,
+        "gf": 71,
+        "ga": 45,
+        "gd": 26,
+        "points": 76,
+        "form": "DLWWD"
+      },
+      {
+        "pos": 6,
+        "code": "VIL",
+        "team": "Villarreal",
+        "played": 38,
+        "won": 16,
+        "drawn": 12,
+        "lost": 10,
+        "gf": 48,
+        "ga": 37,
+        "gd": 11,
+        "points": 60,
+        "form": "WLLDW"
+      },
+      {
+        "pos": 7,
+        "code": "ATH",
+        "team": "Athletic Club",
+        "played": 38,
+        "won": 15,
+        "drawn": 10,
+        "lost": 13,
+        "gf": 42,
+        "ga": 41,
+        "gd": 1,
+        "points": 55,
+        "form": "DDWWW"
+      },
+      {
+        "pos": 8,
+        "code": "CEL",
+        "team": "Celta Vigo",
+        "played": 38,
+        "won": 13,
+        "drawn": 12,
+        "lost": 13,
+        "gf": 47,
+        "ga": 44,
+        "gd": 3,
+        "points": 51,
+        "form": "DWLWL"
+      },
+      {
+        "pos": 9,
+        "code": "MAL",
+        "team": "Málaga",
+        "played": 38,
+        "won": 14,
+        "drawn": 8,
+        "lost": 16,
+        "gf": 42,
+        "ga": 48,
+        "gd": -6,
+        "points": 50,
+        "form": "LWWWL"
+      },
+      {
+        "pos": 10,
+        "code": "ESP",
+        "team": "Espanyol",
+        "played": 38,
+        "won": 13,
+        "drawn": 10,
+        "lost": 15,
+        "gf": 47,
+        "ga": 51,
+        "gd": -4,
+        "points": 49,
+        "form": "WLWDW"
+      },
+      {
+        "pos": 11,
+        "code": "RAY",
+        "team": "Rayo Vallecano",
+        "played": 38,
+        "won": 15,
+        "drawn": 4,
+        "lost": 19,
+        "gf": 46,
+        "ga": 69,
+        "gd": -23,
+        "points": 49,
+        "form": "WLWLL"
+      },
+      {
+        "pos": 12,
+        "code": "RSO",
+        "team": "Real Sociedad",
+        "played": 38,
+        "won": 11,
+        "drawn": 13,
+        "lost": 14,
+        "gf": 44,
+        "ga": 56,
+        "gd": -12,
+        "points": 46,
+        "form": "DDWLD"
+      },
+      {
+        "pos": 13,
+        "code": "ELC",
+        "team": "Elche",
+        "played": 38,
+        "won": 11,
+        "drawn": 8,
+        "lost": 19,
+        "gf": 36,
+        "ga": 73,
+        "gd": -37,
+        "points": 41,
+        "form": "WDDDL"
+      },
+      {
+        "pos": 14,
+        "code": "LEV",
+        "team": "Levante",
+        "played": 38,
+        "won": 9,
+        "drawn": 10,
+        "lost": 19,
+        "gf": 35,
+        "ga": 67,
+        "gd": -32,
+        "points": 37,
+        "form": "DLWLL"
+      },
+      {
+        "pos": 15,
+        "code": "GET",
+        "team": "Getafe",
+        "played": 38,
+        "won": 10,
+        "drawn": 7,
+        "lost": 21,
+        "gf": 33,
+        "ga": 64,
+        "gd": -31,
+        "points": 37,
+        "form": "WLLWL"
+      },
+      {
+        "pos": 16,
+        "code": "DEP",
+        "team": "Deportivo",
+        "played": 38,
+        "won": 7,
+        "drawn": 14,
+        "lost": 17,
+        "gf": 35,
+        "ga": 60,
+        "gd": -25,
+        "points": 35,
+        "form": "DLWLD"
+      },
+      {
+        "pos": 17,
+        "code": "GRA",
+        "team": "Granada",
+        "played": 38,
+        "won": 7,
+        "drawn": 14,
+        "lost": 17,
+        "gf": 29,
+        "ga": 64,
+        "gd": -35,
+        "points": 35,
+        "form": "LLWDD"
+      },
+      {
+        "pos": 18,
+        "code": "EIB",
+        "team": "Eibar",
+        "played": 38,
+        "won": 9,
+        "drawn": 8,
+        "lost": 21,
+        "gf": 34,
+        "ga": 53,
+        "gd": -19,
+        "points": 35,
+        "form": "LLWLL"
+      },
+      {
+        "pos": 19,
+        "code": "ALM",
+        "team": "Almería",
+        "played": 38,
+        "won": 8,
+        "drawn": 8,
+        "lost": 22,
+        "gf": 35,
+        "ga": 65,
+        "gd": -30,
+        "points": 32,
+        "form": "LDLDL"
+      },
+      {
+        "pos": 20,
+        "code": "COR",
+        "team": "Córdoba",
+        "played": 38,
+        "won": 3,
+        "drawn": 11,
+        "lost": 24,
+        "gf": 22,
+        "ga": 68,
+        "gd": -46,
+        "points": 20,
+        "form": "DDDLW"
+      }
+    ],
+    "fc_barcelona_squad": [
+      {
+        "number": 10,
+        "player": "Lionel Messi",
+        "position": "RW",
+        "apps": 38,
+        "goals": 43,
+        "assists": 18,
+        "minutes": 3325,
+        "pass_pct": 84
+      },
+      {
+        "number": 11,
+        "player": "Neymar",
+        "position": "LW",
+        "apps": 33,
+        "goals": 22,
+        "assists": 7,
+        "minutes": 2700,
+        "pass_pct": 82
+      },
+      {
+        "number": 9,
+        "player": "Luis Suárez",
+        "position": "ST",
+        "apps": 27,
+        "goals": 16,
+        "assists": 11,
+        "minutes": 2210,
+        "pass_pct": 81
+      },
+      {
+        "number": 7,
+        "player": "Pedro",
+        "position": "RW",
+        "apps": 27,
+        "goals": 6,
+        "assists": 3,
+        "minutes": 1360,
+        "pass_pct": 84
+      },
+      {
+        "number": 4,
+        "player": "Ivan Rakitić",
+        "position": "CM",
+        "apps": 36,
+        "goals": 5,
+        "assists": 5,
+        "minutes": 2900,
+        "pass_pct": 86
+      },
+      {
+        "number": 24,
+        "player": "Jérémy Mathieu",
+        "position": "CB",
+        "apps": 26,
+        "goals": 3,
+        "assists": 0,
+        "minutes": 2030,
+        "pass_pct": 88
+      },
+      {
+        "number": 8,
+        "player": "Andrés Iniesta",
+        "position": "CM",
+        "apps": 27,
+        "goals": 3,
+        "assists": 4,
+        "minutes": 2050,
+        "pass_pct": 89
+      },
+      {
+        "number": 12,
+        "player": "Rafinha",
+        "position": "CM",
+        "apps": 26,
+        "goals": 3,
+        "assists": 2,
+        "minutes": 1520,
+        "pass_pct": 85
+      },
+      {
+        "number": 22,
+        "player": "Dani Alves",
+        "position": "RB",
+        "apps": 27,
+        "goals": 1,
+        "assists": 6,
+        "minutes": 2210,
+        "pass_pct": 84
+      },
+      {
+        "number": 3,
+        "player": "Gerard Piqué",
+        "position": "CB",
+        "apps": 31,
+        "goals": 1,
+        "assists": 1,
+        "minutes": 2700,
+        "pass_pct": 90
+      },
+      {
+        "number": 18,
+        "player": "Jordi Alba",
+        "position": "LB",
+        "apps": 32,
+        "goals": 1,
+        "assists": 8,
+        "minutes": 2720,
+        "pass_pct": 85
+      },
+      {
+        "number": 15,
+        "player": "Marc Bartra",
+        "position": "CB",
+        "apps": 12,
+        "goals": 1,
+        "assists": 0,
+        "minutes": 870,
+        "pass_pct": 89
+      },
+      {
+        "number": 17,
+        "player": "Munir El Haddadi",
+        "position": "ST",
+        "apps": 12,
+        "goals": 1,
+        "assists": 1,
+        "minutes": 520,
+        "pass_pct": 80
+      },
+      {
+        "number": 19,
+        "player": "Sandro Ramírez",
+        "position": "ST",
+        "apps": 6,
+        "goals": 1,
+        "assists": 0,
+        "minutes": 210,
+        "pass_pct": 79
+      },
+      {
+        "number": 1,
+        "player": "Claudio Bravo",
+        "position": "GK",
+        "apps": 37,
+        "goals": 0,
+        "assists": 0,
+        "minutes": 3330,
+        "pass_pct": 78
+      },
+      {
+        "number": 13,
+        "player": "Marc-André ter Stegen",
+        "position": "GK",
+        "apps": 3,
+        "goals": 0,
+        "assists": 0,
+        "minutes": 270,
+        "pass_pct": 80
+      },
+      {
+        "number": 14,
+        "player": "Javier Mascherano",
+        "position": "CB",
+        "apps": 32,
+        "goals": 0,
+        "assists": 0,
+        "minutes": 2790,
+        "pass_pct": 88
+      },
+      {
+        "number": 2,
+        "player": "Martín Montoya",
+        "position": "RB",
+        "apps": 9,
+        "goals": 0,
+        "assists": 1,
+        "minutes": 640,
+        "pass_pct": 83
+      },
+      {
+        "number": 21,
+        "player": "Adriano",
+        "position": "LB",
+        "apps": 8,
+        "goals": 0,
+        "assists": 0,
+        "minutes": 560,
+        "pass_pct": 84
+      },
+      {
+        "number": 5,
+        "player": "Sergio Busquets",
+        "position": "DM",
+        "apps": 34,
+        "goals": 0,
+        "assists": 1,
+        "minutes": 3010,
+        "pass_pct": 91
+      },
+      {
+        "number": 6,
+        "player": "Xavi",
+        "position": "CM",
+        "apps": 27,
+        "goals": 0,
+        "assists": 4,
+        "minutes": 1290,
+        "pass_pct": 91
+      },
+      {
+        "number": 20,
+        "player": "Sergi Roberto",
+        "position": "CM",
+        "apps": 12,
+        "goals": 0,
+        "assists": 1,
+        "minutes": 560,
+        "pass_pct": 88
+      }
+    ]
+  },
+  "world_cup_2026": {
+    "team_metrics": [
+      {
+        "rank": 1,
+        "code": "ARG",
+        "team": "Argentina",
+        "possession_pct": 68,
+        "xg_for": 2.39,
+        "xg_against": 0.61,
+        "shots": 16,
+        "shots_on_target": 6,
+        "pass_pct": 88,
+        "ppda": 6.2,
+        "team_rating": 7.77
+      },
+      {
+        "rank": 2,
+        "code": "ENG",
+        "team": "England",
+        "possession_pct": 65,
+        "xg_for": 2.08,
+        "xg_against": 0.65,
+        "shots": 17,
+        "shots_on_target": 7,
+        "pass_pct": 88,
+        "ppda": 7.4,
+        "team_rating": 7.73
+      },
+      {
+        "rank": 3,
+        "code": "ESP",
+        "team": "Spain",
+        "possession_pct": 62,
+        "xg_for": 2.3,
+        "xg_against": 0.57,
+        "shots": 16,
+        "shots_on_target": 5,
+        "pass_pct": 86,
+        "ppda": 6.4,
+        "team_rating": 7.72
+      },
+      {
+        "rank": 4,
+        "code": "GER",
+        "team": "Germany",
+        "possession_pct": 63,
+        "xg_for": 1.99,
+        "xg_against": 0.89,
+        "shots": 15,
+        "shots_on_target": 6,
+        "pass_pct": 88,
+        "ppda": 6.8,
+        "team_rating": 7.7
+      },
+      {
+        "rank": 5,
+        "code": "BRA",
+        "team": "Brazil",
+        "possession_pct": 67,
+        "xg_for": 2.35,
+        "xg_against": 0.63,
+        "shots": 18,
+        "shots_on_target": 7,
+        "pass_pct": 89,
+        "ppda": 6.1,
+        "team_rating": 7.69
+      },
+      {
+        "rank": 6,
+        "code": "NED",
+        "team": "Netherlands",
+        "possession_pct": 61,
+        "xg_for": 2.1,
+        "xg_against": 0.7,
+        "shots": 16,
+        "shots_on_target": 6,
+        "pass_pct": 88,
+        "ppda": 7.2,
+        "team_rating": 7.69
+      },
+      {
+        "rank": 7,
+        "code": "FRA",
+        "team": "France",
+        "possession_pct": 63,
+        "xg_for": 2.11,
+        "xg_against": 0.71,
+        "shots": 17,
+        "shots_on_target": 6,
+        "pass_pct": 89,
+        "ppda": 6.2,
+        "team_rating": 7.66
+      },
+      {
+        "rank": 8,
+        "code": "POR",
+        "team": "Portugal",
+        "possession_pct": 60,
+        "xg_for": 2.01,
+        "xg_against": 0.94,
+        "shots": 16,
+        "shots_on_target": 7,
+        "pass_pct": 86,
+        "ppda": 7.1,
+        "team_rating": 7.54
+      },
+      {
+        "rank": 9,
+        "code": "BEL",
+        "team": "Belgium",
+        "possession_pct": 58,
+        "xg_for": 1.9,
+        "xg_against": 0.96,
+        "shots": 15,
+        "shots_on_target": 5,
+        "pass_pct": 87,
+        "ppda": 6.8,
+        "team_rating": 7.46
+      },
+      {
+        "rank": 10,
+        "code": "CRO",
+        "team": "Croatia",
+        "possession_pct": 59,
+        "xg_for": 1.8,
+        "xg_against": 1.08,
+        "shots": 16,
+        "shots_on_target": 7,
+        "pass_pct": 86,
+        "ppda": 8.4,
+        "team_rating": 7.42
+      },
+      {
+        "rank": 11,
+        "code": "MEX",
+        "team": "Mexico",
+        "possession_pct": 53,
+        "xg_for": 1.69,
+        "xg_against": 1.04,
+        "shots": 15,
+        "shots_on_target": 6,
+        "pass_pct": 84,
+        "ppda": 7.9,
+        "team_rating": 7.36
+      },
+      {
+        "rank": 12,
+        "code": "MAR",
+        "team": "Morocco",
+        "possession_pct": 55,
+        "xg_for": 1.78,
+        "xg_against": 0.94,
+        "shots": 14,
+        "shots_on_target": 4,
+        "pass_pct": 86,
+        "ppda": 7.6,
+        "team_rating": 7.36
+      },
+      {
+        "rank": 13,
+        "code": "TUR",
+        "team": "Türkiye",
+        "possession_pct": 57,
+        "xg_for": 1.6,
+        "xg_against": 1.26,
+        "shots": 16,
+        "shots_on_target": 5,
+        "pass_pct": 85,
+        "ppda": 9.1,
+        "team_rating": 7.36
+      },
+      {
+        "rank": 14,
+        "code": "NOR",
+        "team": "Norway",
+        "possession_pct": 54,
+        "xg_for": 1.67,
+        "xg_against": 1.2,
+        "shots": 15,
+        "shots_on_target": 6,
+        "pass_pct": 83,
+        "ppda": 8.3,
+        "team_rating": 7.35
+      },
+      {
+        "rank": 15,
+        "code": "URU",
+        "team": "Uruguay",
+        "possession_pct": 61,
+        "xg_for": 1.98,
+        "xg_against": 1.05,
+        "shots": 15,
+        "shots_on_target": 6,
+        "pass_pct": 86,
+        "ppda": 8.4,
+        "team_rating": 7.34
+      },
+      {
+        "rank": 16,
+        "code": "COL",
+        "team": "Colombia",
+        "possession_pct": 57,
+        "xg_for": 1.94,
+        "xg_against": 1.03,
+        "shots": 13,
+        "shots_on_target": 4,
+        "pass_pct": 83,
+        "ppda": 7.7,
+        "team_rating": 7.29
+      },
+      {
+        "rank": 17,
+        "code": "SEN",
+        "team": "Senegal",
+        "possession_pct": 56,
+        "xg_for": 1.67,
+        "xg_against": 1.15,
+        "shots": 15,
+        "shots_on_target": 6,
+        "pass_pct": 85,
+        "ppda": 8.7,
+        "team_rating": 7.29
+      },
+      {
+        "rank": 18,
+        "code": "JPN",
+        "team": "Japan",
+        "possession_pct": 57,
+        "xg_for": 1.77,
+        "xg_against": 1.08,
+        "shots": 13,
+        "shots_on_target": 4,
+        "pass_pct": 86,
+        "ppda": 8.9,
+        "team_rating": 7.24
+      },
+      {
+        "rank": 19,
+        "code": "SUI",
+        "team": "Switzerland",
+        "possession_pct": 57,
+        "xg_for": 1.69,
+        "xg_against": 1.13,
+        "shots": 15,
+        "shots_on_target": 6,
+        "pass_pct": 85,
+        "ppda": 7.9,
+        "team_rating": 7.23
+      },
+      {
+        "rank": 20,
+        "code": "SWE",
+        "team": "Sweden",
+        "possession_pct": 52,
+        "xg_for": 1.73,
+        "xg_against": 1.35,
+        "shots": 14,
+        "shots_on_target": 5,
+        "pass_pct": 81,
+        "ppda": 8.9,
+        "team_rating": 7.23
+      },
+      {
+        "rank": 21,
+        "code": "USA",
+        "team": "United States",
+        "possession_pct": 51,
+        "xg_for": 1.69,
+        "xg_against": 1.1,
+        "shots": 13,
+        "shots_on_target": 5,
+        "pass_pct": 82,
+        "ppda": 9,
+        "team_rating": 7.2
+      },
+      {
+        "rank": 22,
+        "code": "AUT",
+        "team": "Austria",
+        "possession_pct": 56,
+        "xg_for": 1.6,
+        "xg_against": 1.15,
+        "shots": 13,
+        "shots_on_target": 4,
+        "pass_pct": 84,
+        "ppda": 8.5,
+        "team_rating": 7.17
+      },
+      {
+        "rank": 23,
+        "code": "CIV",
+        "team": "Ivory Coast",
+        "possession_pct": 54,
+        "xg_for": 1.39,
+        "xg_against": 1.23,
+        "shots": 14,
+        "shots_on_target": 5,
+        "pass_pct": 84,
+        "ppda": 8.6,
+        "team_rating": 7.17
+      },
+      {
+        "rank": 24,
+        "code": "KOR",
+        "team": "South Korea",
+        "possession_pct": 55,
+        "xg_for": 1.53,
+        "xg_against": 1.17,
+        "shots": 12,
+        "shots_on_target": 4,
+        "pass_pct": 81,
+        "ppda": 9.5,
+        "team_rating": 7.13
+      },
+      {
+        "rank": 25,
+        "code": "IRN",
+        "team": "Iran",
+        "possession_pct": 51,
+        "xg_for": 1.63,
+        "xg_against": 1.43,
+        "shots": 13,
+        "shots_on_target": 5,
+        "pass_pct": 83,
+        "ppda": 9.6,
+        "team_rating": 7.12
+      },
+      {
+        "rank": 26,
+        "code": "ECU",
+        "team": "Ecuador",
+        "possession_pct": 55,
+        "xg_for": 1.65,
+        "xg_against": 1.35,
+        "shots": 15,
+        "shots_on_target": 5,
+        "pass_pct": 80,
+        "ppda": 8.4,
+        "team_rating": 7.11
+      },
+      {
+        "rank": 27,
+        "code": "EGY",
+        "team": "Egypt",
+        "possession_pct": 49,
+        "xg_for": 1.55,
+        "xg_against": 1.3,
+        "shots": 13,
+        "shots_on_target": 5,
+        "pass_pct": 83,
+        "ppda": 10,
+        "team_rating": 7.09
+      },
+      {
+        "rank": 28,
+        "code": "CAN",
+        "team": "Canada",
+        "possession_pct": 51,
+        "xg_for": 1.56,
+        "xg_against": 1.5,
+        "shots": 13,
+        "shots_on_target": 5,
+        "pass_pct": 82,
+        "ppda": 9.6,
+        "team_rating": 7.07
+      },
+      {
+        "rank": 29,
+        "code": "GHA",
+        "team": "Ghana",
+        "possession_pct": 49,
+        "xg_for": 1.2,
+        "xg_against": 1.29,
+        "shots": 11,
+        "shots_on_target": 4,
+        "pass_pct": 80,
+        "ppda": 9.3,
+        "team_rating": 7.05
+      },
+      {
+        "rank": 30,
+        "code": "SCO",
+        "team": "Scotland",
+        "possession_pct": 50,
+        "xg_for": 1.35,
+        "xg_against": 1.3,
+        "shots": 14,
+        "shots_on_target": 5,
+        "pass_pct": 80,
+        "ppda": 8.8,
+        "team_rating": 7.03
+      },
+      {
+        "rank": 31,
+        "code": "ALG",
+        "team": "Algeria",
+        "possession_pct": 52,
+        "xg_for": 1.57,
+        "xg_against": 1.28,
+        "shots": 14,
+        "shots_on_target": 4,
+        "pass_pct": 81,
+        "ppda": 9.1,
+        "team_rating": 7.02
+      },
+      {
+        "rank": 32,
+        "code": "AUS",
+        "team": "Australia",
+        "possession_pct": 51,
+        "xg_for": 1.35,
+        "xg_against": 1.39,
+        "shots": 11,
+        "shots_on_target": 4,
+        "pass_pct": 81,
+        "ppda": 10.3,
+        "team_rating": 7.01
+      },
+      {
+        "rank": 33,
+        "code": "BIH",
+        "team": "Bosnia & H.",
+        "possession_pct": 50,
+        "xg_for": 1.43,
+        "xg_against": 1.53,
+        "shots": 13,
+        "shots_on_target": 5,
+        "pass_pct": 82,
+        "ppda": 8.9,
+        "team_rating": 7
+      },
+      {
+        "rank": 34,
+        "code": "PAR",
+        "team": "Paraguay",
+        "possession_pct": 48,
+        "xg_for": 1.19,
+        "xg_against": 1.33,
+        "shots": 13,
+        "shots_on_target": 4,
+        "pass_pct": 81,
+        "ppda": 10.1,
+        "team_rating": 6.98
+      },
+      {
+        "rank": 35,
+        "code": "TUN",
+        "team": "Tunisia",
+        "possession_pct": 50,
+        "xg_for": 1.3,
+        "xg_against": 1.49,
+        "shots": 13,
+        "shots_on_target": 5,
+        "pass_pct": 82,
+        "ppda": 10.4,
+        "team_rating": 6.97
+      },
+      {
+        "rank": 36,
+        "code": "CZE",
+        "team": "Czechia",
+        "possession_pct": 50,
+        "xg_for": 1.44,
+        "xg_against": 1.28,
+        "shots": 12,
+        "shots_on_target": 4,
+        "pass_pct": 79,
+        "ppda": 9.5,
+        "team_rating": 6.97
+      },
+      {
+        "rank": 37,
+        "code": "QAT",
+        "team": "Qatar",
+        "possession_pct": 47,
+        "xg_for": 1.33,
+        "xg_against": 1.58,
+        "shots": 11,
+        "shots_on_target": 3,
+        "pass_pct": 78,
+        "ppda": 9.9,
+        "team_rating": 6.94
+      },
+      {
+        "rank": 38,
+        "code": "COD",
+        "team": "DR Congo",
+        "possession_pct": 50,
+        "xg_for": 1.13,
+        "xg_against": 1.42,
+        "shots": 12,
+        "shots_on_target": 5,
+        "pass_pct": 79,
+        "ppda": 9.9,
+        "team_rating": 6.92
+      },
+      {
+        "rank": 39,
+        "code": "KSA",
+        "team": "Saudi Arabia",
+        "possession_pct": 49,
+        "xg_for": 1.14,
+        "xg_against": 1.7,
+        "shots": 11,
+        "shots_on_target": 3,
+        "pass_pct": 78,
+        "ppda": 9.9,
+        "team_rating": 6.9
+      },
+      {
+        "rank": 40,
+        "code": "UZB",
+        "team": "Uzbekistan",
+        "possession_pct": 46,
+        "xg_for": 1.02,
+        "xg_against": 1.61,
+        "shots": 12,
+        "shots_on_target": 4,
+        "pass_pct": 78,
+        "ppda": 10.2,
+        "team_rating": 6.81
+      },
+      {
+        "rank": 41,
+        "code": "RSA",
+        "team": "South Africa",
+        "possession_pct": 46,
+        "xg_for": 1.08,
+        "xg_against": 1.5,
+        "shots": 12,
+        "shots_on_target": 4,
+        "pass_pct": 77,
+        "ppda": 10.9,
+        "team_rating": 6.72
+      },
+      {
+        "rank": 42,
+        "code": "JOR",
+        "team": "Jordan",
+        "possession_pct": 46,
+        "xg_for": 1.12,
+        "xg_against": 1.73,
+        "shots": 11,
+        "shots_on_target": 4,
+        "pass_pct": 76,
+        "ppda": 11.5,
+        "team_rating": 6.69
+      },
+      {
+        "rank": 43,
+        "code": "PAN",
+        "team": "Panama",
+        "possession_pct": 47,
+        "xg_for": 1.16,
+        "xg_against": 1.66,
+        "shots": 11,
+        "shots_on_target": 4,
+        "pass_pct": 79,
+        "ppda": 11,
+        "team_rating": 6.68
+      },
+      {
+        "rank": 44,
+        "code": "IRQ",
+        "team": "Iraq",
+        "possession_pct": 44,
+        "xg_for": 1.15,
+        "xg_against": 1.58,
+        "shots": 12,
+        "shots_on_target": 4,
+        "pass_pct": 78,
+        "ppda": 10.1,
+        "team_rating": 6.68
+      },
+      {
+        "rank": 45,
+        "code": "NZL",
+        "team": "New Zealand",
+        "possession_pct": 41,
+        "xg_for": 0.8,
+        "xg_against": 1.91,
+        "shots": 11,
+        "shots_on_target": 5,
+        "pass_pct": 76,
+        "ppda": 11.1,
+        "team_rating": 6.6
+      },
+      {
+        "rank": 46,
+        "code": "CPV",
+        "team": "Cape Verde",
+        "possession_pct": 37,
+        "xg_for": 0.82,
+        "xg_against": 1.85,
+        "shots": 11,
+        "shots_on_target": 4,
+        "pass_pct": 75,
+        "ppda": 12.2,
+        "team_rating": 6.59
+      },
+      {
+        "rank": 47,
+        "code": "HAI",
+        "team": "Haiti",
+        "possession_pct": 38,
+        "xg_for": 0.7,
+        "xg_against": 1.77,
+        "shots": 9,
+        "shots_on_target": 3,
+        "pass_pct": 76,
+        "ppda": 11.5,
+        "team_rating": 6.53
+      },
+      {
+        "rank": 48,
+        "code": "CUW",
+        "team": "Curaçao",
+        "possession_pct": 36,
+        "xg_for": 0.67,
+        "xg_against": 1.92,
+        "shots": 10,
+        "shots_on_target": 4,
+        "pass_pct": 74,
+        "ppda": 12.5,
+        "team_rating": 6.5
+      }
+    ],
+    "group_standings": [
+      {
+        "group": "A",
+        "table": [
+          {
+            "pos": 1,
+            "code": "RSA",
+            "team": "South Africa",
+            "played": 3,
+            "gd": 1,
+            "points": 5
+          },
+          {
+            "pos": 2,
+            "code": "CZE",
+            "team": "Czechia",
+            "played": 3,
+            "gd": 0,
+            "points": 3
+          },
+          {
+            "pos": 3,
+            "code": "MEX",
+            "team": "Mexico",
+            "played": 3,
+            "gd": 0,
+            "points": 3
+          },
+          {
+            "pos": 4,
+            "code": "KOR",
+            "team": "South Korea",
+            "played": 3,
+            "gd": -1,
+            "points": 2
+          }
+        ]
+      },
+      {
+        "group": "B",
+        "table": [
+          {
+            "pos": 1,
+            "code": "SUI",
+            "team": "Switzerland",
+            "played": 3,
+            "gd": 2,
+            "points": 7
+          },
+          {
+            "pos": 2,
+            "code": "QAT",
+            "team": "Qatar",
+            "played": 3,
+            "gd": 1,
+            "points": 5
+          },
+          {
+            "pos": 3,
+            "code": "CAN",
+            "team": "Canada",
+            "played": 3,
+            "gd": -1,
+            "points": 2
+          },
+          {
+            "pos": 4,
+            "code": "BIH",
+            "team": "Bosnia & H.",
+            "played": 3,
+            "gd": -2,
+            "points": 1
+          }
+        ]
+      },
+      {
+        "group": "C",
+        "table": [
+          {
+            "pos": 1,
+            "code": "BRA",
+            "team": "Brazil",
+            "played": 3,
+            "gd": 2,
+            "points": 7
+          },
+          {
+            "pos": 2,
+            "code": "MAR",
+            "team": "Morocco",
+            "played": 3,
+            "gd": 2,
+            "points": 7
+          },
+          {
+            "pos": 3,
+            "code": "SCO",
+            "team": "Scotland",
+            "played": 3,
+            "gd": -1,
+            "points": 3
+          },
+          {
+            "pos": 4,
+            "code": "HAI",
+            "team": "Haiti",
+            "played": 3,
+            "gd": -3,
+            "points": 0
+          }
+        ]
+      },
+      {
+        "group": "D",
+        "table": [
+          {
+            "pos": 1,
+            "code": "TUR",
+            "team": "Türkiye",
+            "played": 3,
+            "gd": 1,
+            "points": 5
+          },
+          {
+            "pos": 2,
+            "code": "AUS",
+            "team": "Australia",
+            "played": 3,
+            "gd": 0,
+            "points": 4
+          },
+          {
+            "pos": 3,
+            "code": "USA",
+            "team": "United States",
+            "played": 3,
+            "gd": 0,
+            "points": 3
+          },
+          {
+            "pos": 4,
+            "code": "PAR",
+            "team": "Paraguay",
+            "played": 3,
+            "gd": -1,
+            "points": 2
+          }
+        ]
+      },
+      {
+        "group": "E",
+        "table": [
+          {
+            "pos": 1,
+            "code": "GER",
+            "team": "Germany",
+            "played": 3,
+            "gd": 6,
+            "points": 9
+          },
+          {
+            "pos": 2,
+            "code": "ECU",
+            "team": "Ecuador",
+            "played": 3,
+            "gd": 1,
+            "points": 6
+          },
+          {
+            "pos": 3,
+            "code": "CIV",
+            "team": "Ivory Coast",
+            "played": 3,
+            "gd": -2,
+            "points": 3
+          },
+          {
+            "pos": 4,
+            "code": "CUW",
+            "team": "Curaçao",
+            "played": 3,
+            "gd": -5,
+            "points": 0
+          }
+        ]
+      },
+      {
+        "group": "F",
+        "table": [
+          {
+            "pos": 1,
+            "code": "NED",
+            "team": "Netherlands",
+            "played": 3,
+            "gd": 3,
+            "points": 7
+          },
+          {
+            "pos": 2,
+            "code": "SWE",
+            "team": "Sweden",
+            "played": 3,
+            "gd": -1,
+            "points": 4
+          },
+          {
+            "pos": 3,
+            "code": "TUN",
+            "team": "Tunisia",
+            "played": 3,
+            "gd": 0,
+            "points": 3
+          },
+          {
+            "pos": 4,
+            "code": "JPN",
+            "team": "Japan",
+            "played": 3,
+            "gd": -2,
+            "points": 1
+          }
+        ]
+      },
+      {
+        "group": "G",
+        "table": [
+          {
+            "pos": 1,
+            "code": "BEL",
+            "team": "Belgium",
+            "played": 3,
+            "gd": 2,
+            "points": 6
+          },
+          {
+            "pos": 2,
+            "code": "NZL",
+            "team": "New Zealand",
+            "played": 3,
+            "gd": 0,
+            "points": 4
+          },
+          {
+            "pos": 3,
+            "code": "IRN",
+            "team": "Iran",
+            "played": 3,
+            "gd": 0,
+            "points": 4
+          },
+          {
+            "pos": 4,
+            "code": "EGY",
+            "team": "Egypt",
+            "played": 3,
+            "gd": -2,
+            "points": 2
+          }
+        ]
+      },
+      {
+        "group": "H",
+        "table": [
+          {
+            "pos": 1,
+            "code": "URU",
+            "team": "Uruguay",
+            "played": 3,
+            "gd": 3,
+            "points": 7
+          },
+          {
+            "pos": 2,
+            "code": "ESP",
+            "team": "Spain",
+            "played": 3,
+            "gd": 2,
+            "points": 7
+          },
+          {
+            "pos": 3,
+            "code": "KSA",
+            "team": "Saudi Arabia",
+            "played": 3,
+            "gd": -2,
+            "points": 1
+          },
+          {
+            "pos": 4,
+            "code": "CPV",
+            "team": "Cape Verde",
+            "played": 3,
+            "gd": -3,
+            "points": 1
+          }
+        ]
+      },
+      {
+        "group": "I",
+        "table": [
+          {
+            "pos": 1,
+            "code": "FRA",
+            "team": "France",
+            "played": 3,
+            "gd": 1,
+            "points": 6
+          },
+          {
+            "pos": 2,
+            "code": "SEN",
+            "team": "Senegal",
+            "played": 3,
+            "gd": 1,
+            "points": 5
+          },
+          {
+            "pos": 3,
+            "code": "NOR",
+            "team": "Norway",
+            "played": 3,
+            "gd": 0,
+            "points": 4
+          },
+          {
+            "pos": 4,
+            "code": "IRQ",
+            "team": "Iraq",
+            "played": 3,
+            "gd": -2,
+            "points": 1
+          }
+        ]
+      },
+      {
+        "group": "J",
+        "table": [
+          {
+            "pos": 1,
+            "code": "AUT",
+            "team": "Austria",
+            "played": 3,
+            "gd": 2,
+            "points": 7
+          },
+          {
+            "pos": 2,
+            "code": "ARG",
+            "team": "Argentina",
+            "played": 3,
+            "gd": 2,
+            "points": 5
+          },
+          {
+            "pos": 3,
+            "code": "ALG",
+            "team": "Algeria",
+            "played": 3,
+            "gd": 0,
+            "points": 4
+          },
+          {
+            "pos": 4,
+            "code": "JOR",
+            "team": "Jordan",
+            "played": 3,
+            "gd": -4,
+            "points": 0
+          }
+        ]
+      },
+      {
+        "group": "K",
+        "table": [
+          {
+            "pos": 1,
+            "code": "COD",
+            "team": "DR Congo",
+            "played": 3,
+            "gd": 1,
+            "points": 5
+          },
+          {
+            "pos": 2,
+            "code": "COL",
+            "team": "Colombia",
+            "played": 3,
+            "gd": 1,
+            "points": 5
+          },
+          {
+            "pos": 3,
+            "code": "POR",
+            "team": "Portugal",
+            "played": 3,
+            "gd": 0,
+            "points": 3
+          },
+          {
+            "pos": 4,
+            "code": "UZB",
+            "team": "Uzbekistan",
+            "played": 3,
+            "gd": -2,
+            "points": 1
+          }
+        ]
+      },
+      {
+        "group": "L",
+        "table": [
+          {
+            "pos": 1,
+            "code": "ENG",
+            "team": "England",
+            "played": 3,
+            "gd": 3,
+            "points": 7
+          },
+          {
+            "pos": 2,
+            "code": "CRO",
+            "team": "Croatia",
+            "played": 3,
+            "gd": 2,
+            "points": 5
+          },
+          {
+            "pos": 3,
+            "code": "GHA",
+            "team": "Ghana",
+            "played": 3,
+            "gd": 0,
+            "points": 4
+          },
+          {
+            "pos": 4,
+            "code": "PAN",
+            "team": "Panama",
+            "played": 3,
+            "gd": -5,
+            "points": 0
+          }
+        ]
+      }
+    ]
+  }
+}

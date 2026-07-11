@@ -23,6 +23,8 @@ _FLAGS = {
     "SRB": "🇷🇸", "CMR": "🇨🇲", "CIV": "🇨🇮", "KSA": "🇸🇦", "QAT": "🇶🇦", "IRN": "🇮🇷",
     "CRC": "🇨🇷", "TUN": "🇹🇳", "ALG": "🇩🇿", "ECU": "🇪🇨", "PAR": "🇵🇾", "AUT": "🇦🇹",
     "UZB": "🇺🇿", "JOR": "🇯🇴", "RSA": "🇿🇦", "PAN": "🇵🇦", "SCO": "🏴", "WAL": "🏴",
+    "SWE": "🇸🇪", "DCO": "🇨🇩", "COD": "🇨🇩", "BIH": "🇧🇦", "DZA": "🇩🇿", "CZE": "🇨🇿",
+    "IRI": "🇮🇷", "IRA": "🇮🇷", "CUR": "🇨🇼", "HAI": "🇭🇹", "TUR": "🇹🇷", "CPV": "🇨🇻",
 }
 
 def country_flag(code: str) -> str:

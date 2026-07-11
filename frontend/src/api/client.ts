@@ -32,4 +32,20 @@ export const getShots = (p: { club?: number; player?: number } = {}) =>
 export const getLiveMatches = () => request<LiveMatch[]>('/api/live/matches')
 export const getLiveFixtures = () => request<Fixture[]>('/api/live/fixtures')
 export const getLiveStandings = () => request<StandingRow[]>('/api/live/standings')
+export const getKnockout = () => request<LiveMatch[]>('/api/live/knockout')
+
+/** Trigger the backend to fetch the latest scores and rebuild the WC tables. */
+export async function refreshLive(): Promise<{ ok: boolean }> {
+  try {
+    const res = await fetch(`${API_BASE}/api/live/refresh`, { method: 'POST' })
+    return res.ok ? ((await res.json()) as { ok: boolean }) : { ok: false }
+  } catch {
+    return { ok: false }
+  }
+}
 export const getMeta = () => request<Meta>('/api/meta')
+
+// Historic league table (team_season). Rows are cast to the adapter's TeamSeasonRow.
+export const getStandings = () => request<unknown[]>('/api/standings')
+
+export type { LiveMatch as LiveMatchResult } from './types'

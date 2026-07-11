@@ -88,6 +88,11 @@ def live_standings(con):
         return []
     return _rows(con, 'SELECT * FROM standings ORDER BY "group", rank')
 
+def knockout(con):
+    if not table_exists(con, "knockout"):
+        return []
+    return _rows(con, "SELECT * FROM knockout ORDER BY kickoff")
+
 def table_counts(con):
     out = {}
     for t in _TABLES:

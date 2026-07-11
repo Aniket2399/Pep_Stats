@@ -37,6 +37,29 @@ OVERLAY = (
     "Object.assign(res,window.__APEX_WC[code]);}catch(e){} this._twc[code]=res;"
 )
 
+# --- Overlay CLUB: fix the crash that blanks EVERY World Cup tab ---
+# On the WC source, the selected club code (e.g. 'BAR') isn't in the WC team map,
+# so `this.teams[code]` is undefined and `team.name` throws — killing the whole
+# view (which blanks all tables). Default the club to a valid code for the source.
+CLUB_ANCHOR = "const code=this.useClub(); const team=this.teams[code];"
+CLUB_OVERLAY = (
+    "if(this.standings&&this.standings[0]&&!this.teams[this.state.club])"
+    "this.state.club=this.standings[0].code; "
+    "const code=this.useClub(); const team=this.teams[code]||{};"
+)
+
+# --- Overlay VIEW: expose the computed view so the fill layer can expand loops ---
+# The standalone dc-runtime renders each <sc-for> template row ONCE without
+# iterating (loop-var bindings like {{ r.pos }} never resolve). renderVals()
+# builds the correct, fully-formatted view `v`; publish it on window so the
+# injected fill script can expand the loop tables from it.
+VIEW_ANCHOR = "if(v.isWC)this.wcVals(v,S);"
+VIEW_OVERLAY = (
+    "if(v.isWC)this.wcVals(v,S); "
+    "try{window.__APEX_VIEW=v;window.__APEX_VIEW_SEQ=(window.__APEX_VIEW_SEQ||0)+1;"
+    "if(window.__APEX_FILL)requestAnimationFrame(window.__APEX_FILL);}catch(e){}"
+)
+
 # --- Overlay B: World Cup standings/groups (from window.__APEX_STD, API-sourced) ---
 # `this.wcStd=teams.map(...)` is the single point group tables are built from.
 STD_ANCHOR = "Pts:3*w+d}; });"
@@ -93,7 +116,11 @@ WC_LIVE = os.environ.get("APEX_WC_LIVE") == "1"
 
 
 def inject(html: str, data: dict) -> str:
-    overlays = [("teamWC (Teams metrics)", ANCHOR, OVERLAY)]
+    overlays = [
+        ("club crash-fix (all WC tabs)", CLUB_ANCHOR, CLUB_OVERLAY),
+        ("view exposure (fill layer)", VIEW_ANCHOR, VIEW_OVERLAY),
+        ("teamWC (Teams metrics)", ANCHOR, OVERLAY),
+    ]
     if WC_LIVE:
         overlays += [
             ("wcStd (Groups standings)", STD_ANCHOR, STD_OVERLAY),
