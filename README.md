@@ -90,6 +90,25 @@ cd frontend && npm test     # Vitest (adapter, charts, tabs)
 pytest                      # backend
 ```
 
+## Deploy
+
+The frontend is a static build:
+
+```bash
+cd frontend
+VITE_API_URL=https://your-api.example.com npm run build   # → frontend/dist/
+```
+
+Host `frontend/dist/` on any static host (Netlify, Vercel, GitHub Pages, S3),
+and point it at your deployed serving API with `VITE_API_URL` at build time.
+The FastAPI service (`uvicorn apex.api.app:app`) runs anywhere `apex.duckdb` is
+present — it's read-only and CORS-open.
+
+## CI
+
+Every push / PR to `main` runs the frontend test suite and a production build
+via GitHub Actions (`.github/workflows/ci.yml`).
+
 ## Tech
 
 TypeScript · React · Vite · Vitest · Python · FastAPI · DuckDB · pandas · StatsBomb · ScraperFC
