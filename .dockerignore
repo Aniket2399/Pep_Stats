@@ -1,0 +1,19 @@
+# Keep the API image build context tiny — only apex/ + the serving DB are copied.
+frontend
+docs
+tests
+dashboard
+scripts
+venv
+node_modules
+.git
+.github
+**/__pycache__
+*.pyc
+.pytest_cache
+.superpowers
+# raw/processed data (never needed by the API)
+data/raw
+data/processed
+data/live
+data/serving/*.parquet
