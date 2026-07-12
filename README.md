@@ -120,6 +120,24 @@ Fly.io, etc. — `docker build -t pepstats-api . && docker run -p 8000:8000 peps
 > skip it, the Historic tabs still work from bundled cached data, but the World
 > Cup tabs need the API.
 
+### Refreshing the World Cup scores
+
+Scores ship **with the build** — `data/serving/apex.duckdb` is a committed
+artifact, not something the server fetches at runtime. (The API image has no
+pandas/ScraperFC, Render's disk is ephemeral, and every deploy re-bakes the DB
+from the Dockerfile — so a request-time refresh cannot persist.)
+
+To publish new scores, scrape locally and commit the DB. Auto-deploy ships it:
+
+```bash
+python -m apex.live.cli refresh
+git commit data/serving/apex.duckdb -m "data: refresh WC scores"
+git push
+```
+
+The UI shows `SCORES AS OF <date>` from the `live_meta` table, so staleness is
+visible rather than silent.
+
 ## CI
 
 Every push / PR to `main` runs the frontend test suite and a production build
