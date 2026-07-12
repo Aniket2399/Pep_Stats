@@ -56,9 +56,18 @@ def serve(client, now_ts) -> dict:
     try:
         # NOTE: "group" is a DuckDB reserved word (standings.group column) -
         # consumers must quote it as "group" in SQL.
-        for name, df in [("live_matches", live), ("fixtures", fixtures),
-                         ("standings", standings), ("knockout", knockout),
-                         ("live_meta", meta)]:
+        tables = [("live_matches", live), ("fixtures", fixtures),
+                  ("standings", standings), ("knockout", knockout)]
+        # Only stamp live_meta on a genuinely fresh scrape. Under the old
+        # 45-second-cache model, a fallback to cache still meant "checked
+        # moments ago", so re-stamping "now" was harmless. Under the snapshot
+        # model a fallback can be days stale, so re-stamping would advance the
+        # displayed "Scores as of" time onto data that never actually refreshed.
+        # The other tables are safe to rewrite from cache -- their content is
+        # identical to what's already there, so it's idempotent.
+        if source == "live":
+            tables.append(("live_meta", meta))
+        for name, df in tables:
             con.register("df_tmp", df)
             con.execute(f"CREATE OR REPLACE TABLE {name} AS SELECT * FROM df_tmp")
             con.unregister("df_tmp")
