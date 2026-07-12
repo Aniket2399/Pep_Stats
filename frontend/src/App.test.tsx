@@ -1,13 +1,21 @@
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { vi } from 'vitest'
+import { afterEach, vi } from 'vitest'
 import App from './App'
 import type { AppData } from './data/types'
+
+// `liveUpdated` is read fresh by the mock factory on every `getMeta()` call,
+// so individual tests can override it (e.g. to exercise the null fallback)
+// by reassigning this variable before rendering.
+const DEFAULT_LIVE_UPDATED = '2026-07-12T10:00:00+00:00'
+let liveUpdated: string | null = DEFAULT_LIVE_UPDATED
+
+afterEach(() => { liveUpdated = DEFAULT_LIVE_UPDATED })
 
 vi.mock('./api/client', () => ({
   getMeta: () => Promise.resolve({
     historic_updated: null,
-    live_updated: '2026-07-12T10:00:00+00:00',
+    live_updated: liveUpdated,
     source: 'apex.duckdb',
   }),
 }))
@@ -54,4 +62,15 @@ test('the dead "Update scores" button is gone', async () => {
   await user.click(screen.getByRole('button', { name: /World Cup 2026/ }))
 
   expect(screen.queryByRole('button', { name: /Update scores/i })).not.toBeInTheDocument()
+})
+
+test('the World Cup view falls back to an em dash when there is no snapshot timestamp', async () => {
+  liveUpdated = null
+  const user = userEvent.setup()
+  render(<App />)
+  await user.click(screen.getByRole('button', { name: /World Cup 2026/ }))
+
+  const asOf = await screen.findByTestId('scores-as-of')
+  expect(asOf).toHaveTextContent('Scores as of —')
+  expect(asOf).not.toHaveTextContent(/invalid date/i)
 })
