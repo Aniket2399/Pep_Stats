@@ -59,3 +59,31 @@ def test_serve_unparseable_matches_leave_tables_intact(tmp_path, monkeypatch):
     assert con.execute("select count(*) from live_matches").fetchone()[0] == 1     # untouched
     assert con.execute("select count(*) from fixtures").fetchone()[0] == 1         # untouched
     assert con.execute("select count(*) from standings").fetchone()[0] == 1        # untouched
+
+def test_serve_stamps_live_meta(tmp_path, monkeypatch):
+    _paths(tmp_path, monkeypatch)
+    matches = [match_dict(mid=1, status="finished", start_ts=1000, group_name="Group A",
+                          home="A", away="B", home_score=2, away_score=1)]
+    sv.serve(StubClient(matches), now_ts=1_700_000_000)
+
+    con = duckdb.connect(str(config.DUCKDB_PATH))
+    rows = con.execute("select updated_at, source from live_meta").fetchall()
+    assert len(rows) == 1
+    assert rows[0][0].startswith("2023-11-14")   # 1_700_000_000 UTC
+    assert rows[0][1] == "live"
+
+def test_serve_does_not_stamp_live_meta_when_scrape_fails(tmp_path, monkeypatch):
+    """A failed scrape must leave the committed snapshot — and its timestamp — intact,
+    rather than advancing the clock on data that did not change."""
+    _paths(tmp_path, monkeypatch)
+    class Empty:
+        def get_wc_matches(self):
+            from apex.live.client import LiveDataError
+            raise LiveDataError("x")
+
+    sv.serve(Empty(), now_ts=1_700_000_000)
+
+    con = duckdb.connect(str(config.DUCKDB_PATH))
+    assert con.execute(
+        "select count(*) from information_schema.tables where table_name = 'live_meta'"
+    ).fetchone()[0] == 0
