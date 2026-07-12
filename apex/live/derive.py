@@ -1,8 +1,6 @@
 """Derive live/fixtures/standings views from normalized matches."""
 from datetime import datetime
 
-_DAY = 86400
-
 def _kick_ts(iso: str) -> float:
     return datetime.fromisoformat(iso).timestamp()
 
@@ -11,11 +9,23 @@ def derive_fixtures(matches: list) -> list:
     return sorted(sched, key=lambda m: m["kickoff"])
 
 def derive_live(matches: list, now_ts: int) -> list:
-    out = []
-    for m in matches:
-        if m["status"] == "LIVE" or abs(_kick_ts(m["kickoff"]) - now_ts) <= _DAY:
-            out.append(m)
-    return sorted(out, key=lambda m: m["kickoff"])
+    # Rank-based, not clock-based: this table is a committed snapshot refreshed
+    # by hand every few days, not a 45-second cache, so "within N hours of now"
+    # is meaningless -- a scrape run on a day with no kickoffs would otherwise
+    # publish an empty table. Instead we always keep in-progress matches, plus
+    # every FINISHED match belonging to the most recently kicked-off completed
+    # round (stage) -- i.e. "the latest completed round" -- which is bounded
+    # and non-empty for as long as the tournament has been running.
+    # now_ts is accepted (and unused here) only to keep the call signature
+    # stable for other callers/tests; per-match `minute` is computed upstream
+    # in normalize.py.
+    live = [m for m in matches if m["status"] == "LIVE"]
+    finished = [m for m in matches if m["status"] == "FINISHED"]
+    latest_round = []
+    if finished:
+        latest_stage = max(finished, key=lambda m: _kick_ts(m["kickoff"]))["stage"]
+        latest_round = [m for m in finished if m["stage"] == latest_stage]
+    return sorted(live + latest_round, key=lambda m: m["kickoff"])
 
 def derive_standings(matches: list) -> list:
     table = {}   # (group, team) -> stats

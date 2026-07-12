@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useAsync } from './hooks/useAsync'
 import { loadAppData } from './data/adapter'
-import { refreshLive } from './api/client'
+import { getMeta } from './api/client'
 import { crestStyle } from './data/kits'
 import Loading from './components/Loading'
 import ErrorState from './components/ErrorState'
@@ -28,23 +28,11 @@ export default function App() {
   const [source, setSource] = useState<Source>('historic')
   const [tab, setTab] = useState<string>('overview')
   const [club, setClub] = useState<string>('Barcelona')
-  const [updating, setUpdating] = useState(false)
-  const [updateError, setUpdateError] = useState<string | null>(null)
   const { data, loading, error, reload } = useAsync(() => loadAppData(), [])
+  const { data: meta } = useAsync(() => getMeta(), [])
 
   const tabs = source === 'historic' ? HISTORIC_TABS : WC_TABS
   const pick = (s: Source) => { setSource(s); setTab(DEFAULT_TAB[s]) }
-  const onUpdate = async () => {
-    setUpdating(true)
-    setUpdateError(null)
-    try {
-      const res = await refreshLive()
-      if (!res.ok) setUpdateError(res.error ?? 'the refresh failed for an unknown reason')
-    } finally {
-      setUpdating(false)
-      reload()
-    }
-  }
 
   const clubs = useMemo(() => (data ? data.historic.standings.map((r) => r.team) : []), [data])
   const teamRow = data?.historic.standings.find((r) => r.team === club) ?? data?.historic.standings[0]
@@ -90,20 +78,17 @@ export default function App() {
           ))}
         </div>
         {source === 'wc' && (
-          <button className="wc-update" onClick={onUpdate} disabled={updating}
-            title="Fetch the latest scores from the live source">
-            <span className="wc-update-dot" />{updating ? 'Updating…' : 'Update scores'}
-          </button>
+          <span className="wc-asof" data-testid="scores-as-of"
+            title="Scores ship with the build; they are refreshed by re-running the scrape and committing apex.duckdb">
+            Scores as of {meta?.live_updated
+              ? new Date(meta.live_updated).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })
+              : '—'}
+          </span>
         )}
         <div className="season-tag">{source === 'historic' ? 'LA LIGA · 2015/16' : 'WORLD CUP · 2026'}</div>
       </nav>
 
       <main className="wrap-main">
-        {source === 'wc' && updateError && (
-          <div className="update-error" data-testid="update-error" role="alert">
-            <strong>⚠ Couldn't update scores.</strong> The scores below are unchanged. {updateError}
-          </div>
-        )}
         {loading && <Loading />}
         {error && <ErrorState error={error} onRetry={reload} />}
         {data && data.source === 'sample' && <div className="sec-sub" style={{ marginBottom: 12 }}>⚠ Live data service unavailable — showing cached results.</div>}

@@ -1,4 +1,5 @@
 """Serve stage: normalize + derive + write live tables into apex.duckdb."""
+import datetime
 import logging
 import duckdb
 import pandas as pd
@@ -13,6 +14,7 @@ _LIVE_COLS = ["id", "home_team", "away_team", "home_flag", "away_flag",
               "home_score", "away_score", "status", "minute", "stage", "kickoff"]
 _FIX_COLS = ["id", "home_team", "away_team", "home_flag", "away_flag", "stage", "kickoff"]
 _STAND_COLS = ["group", "rank", "team", "flag", "played", "w", "d", "l", "gf", "ga", "gd", "points"]
+_META_COLS = ["updated_at", "source"]
 
 def serve(client, now_ts) -> dict:
     raw, source = get_matches_cached(client, config.LIVE_TTL, now_ts)
@@ -36,9 +38,15 @@ def serve(client, now_ts) -> dict:
     # All knockout (non-group) matches — full bracket source, not just the live window.
     knockout = pd.DataFrame([m for m in matches if not m.get("group")], columns=_LIVE_COLS)
 
+    meta = pd.DataFrame([{
+        "updated_at": datetime.datetime.fromtimestamp(
+            now_ts, tz=datetime.timezone.utc).isoformat(),
+        "source": source,
+    }], columns=_META_COLS)
+
     # Pandas 3.0.3 uses StringDtype by default; DuckDB 1.1.3 doesn't recognize it.
     # Convert StringDtype columns to object for compatibility.
-    for df in [live, fixtures, standings, knockout]:
+    for df in [live, fixtures, standings, knockout, meta]:
         for col in df.columns:
             if df[col].dtype.name == "str":
                 df[col] = df[col].astype(object)
@@ -48,7 +56,18 @@ def serve(client, now_ts) -> dict:
     try:
         # NOTE: "group" is a DuckDB reserved word (standings.group column) -
         # consumers must quote it as "group" in SQL.
-        for name, df in [("live_matches", live), ("fixtures", fixtures), ("standings", standings), ("knockout", knockout)]:
+        tables = [("live_matches", live), ("fixtures", fixtures),
+                  ("standings", standings), ("knockout", knockout)]
+        # Only stamp live_meta on a genuinely fresh scrape. Under the old
+        # 45-second-cache model, a fallback to cache still meant "checked
+        # moments ago", so re-stamping "now" was harmless. Under the snapshot
+        # model a fallback can be days stale, so re-stamping would advance the
+        # displayed "Scores as of" time onto data that never actually refreshed.
+        # The other tables are safe to rewrite from cache -- their content is
+        # identical to what's already there, so it's idempotent.
+        if source == "live":
+            tables.append(("live_meta", meta))
+        for name, df in tables:
             con.register("df_tmp", df)
             con.execute(f"CREATE OR REPLACE TABLE {name} AS SELECT * FROM df_tmp")
             con.unregister("df_tmp")

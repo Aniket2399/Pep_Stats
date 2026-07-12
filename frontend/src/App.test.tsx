@@ -1,11 +1,24 @@
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { vi } from 'vitest'
+import { afterEach, vi } from 'vitest'
 import App from './App'
 import type { AppData } from './data/types'
 
-const refreshLive = vi.fn()
-vi.mock('./api/client', () => ({ refreshLive: (...a: unknown[]) => refreshLive(...a) }))
+// `liveUpdated` is read fresh by the mock factory on every `getMeta()` call,
+// so individual tests can override it (e.g. to exercise the null fallback)
+// by reassigning this variable before rendering.
+const DEFAULT_LIVE_UPDATED = '2026-07-12T10:00:00+00:00'
+let liveUpdated: string | null = DEFAULT_LIVE_UPDATED
+
+afterEach(() => { liveUpdated = DEFAULT_LIVE_UPDATED })
+
+vi.mock('./api/client', () => ({
+  getMeta: () => Promise.resolve({
+    historic_updated: null,
+    live_updated: liveUpdated,
+    source: 'apex.duckdb',
+  }),
+}))
 
 vi.mock('./data/adapter', () => ({
   loadAppData: (): Promise<AppData> => Promise.resolve({
@@ -33,27 +46,31 @@ test('loads data and shows the historic overview club', async () => {
   await waitFor(() => expect(getAllByText('Barcelona').length).toBeGreaterThan(0))
 })
 
-test('shows the reason when "Update scores" fails instead of silently spinning', async () => {
-  refreshLive.mockResolvedValue({ ok: false, error: "ModuleNotFoundError: No module named 'pandas'" })
+test('the World Cup view shows when the scores were last snapshotted', async () => {
   const user = userEvent.setup()
   render(<App />)
-
   await user.click(screen.getByRole('button', { name: /World Cup 2026/ }))
-  await user.click(screen.getByRole('button', { name: /Update scores/ }))
 
-  const err = await screen.findByTestId('update-error')
-  expect(err).toHaveTextContent(/couldn't update/i)
-  expect(err).toHaveTextContent(/pandas/)
+  const asOf = await screen.findByTestId('scores-as-of')
+  expect(asOf).toHaveTextContent(/scores as of/i)
+  expect(asOf).toHaveTextContent(/12 Jul|Jul 12/i)
 })
 
-test('shows no error banner when "Update scores" succeeds', async () => {
-  refreshLive.mockResolvedValue({ ok: true })
+test('the dead "Update scores" button is gone', async () => {
   const user = userEvent.setup()
   render(<App />)
-
   await user.click(screen.getByRole('button', { name: /World Cup 2026/ }))
-  await user.click(screen.getByRole('button', { name: /Update scores/ }))
 
-  await waitFor(() => expect(screen.getByRole('button', { name: /Update scores/ })).toBeEnabled())
-  expect(screen.queryByTestId('update-error')).not.toBeInTheDocument()
+  expect(screen.queryByRole('button', { name: /Update scores/i })).not.toBeInTheDocument()
+})
+
+test('the World Cup view falls back to an em dash when there is no snapshot timestamp', async () => {
+  liveUpdated = null
+  const user = userEvent.setup()
+  render(<App />)
+  await user.click(screen.getByRole('button', { name: /World Cup 2026/ }))
+
+  const asOf = await screen.findByTestId('scores-as-of')
+  expect(asOf).toHaveTextContent('Scores as of —')
+  expect(asOf).not.toHaveTextContent(/invalid date/i)
 })
