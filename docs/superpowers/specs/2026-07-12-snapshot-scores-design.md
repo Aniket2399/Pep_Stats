@@ -1,13 +1,13 @@
 # Snapshot scores: build-time ingest, not request-time refresh
 
 **Date:** 2026-07-12
-**Status:** approved
+**Status:** approved (amended during implementation — see "Corrections" below)
 
 ## Problem
 
-The deployed app shows **1 World Cup match**. The live source has **99**. The
-"Update scores" button that is supposed to fix this has never worked in
-production, and cannot.
+The deployed app shows **1 World Cup match** — a single Quarterfinal — when four
+have been played. The "Update scores" button that is supposed to fix this has
+never worked in production, and cannot.
 
 Three independent reasons it cannot work on Render:
 
@@ -119,3 +119,33 @@ Existing suites must stay green: 64 Python, 49 frontend.
   blanking it.
 - **Manual refresh gets forgotten.** Mitigated, not solved: `SCORES AS OF <date>`
   makes staleness visible in the UI instead of silent.
+
+## Corrections (found during implementation)
+
+Two things this spec got wrong. Recorded rather than quietly edited away,
+because both changed the shape of the fix.
+
+**1. "1 match vs 99" was the wrong diagnosis.** The 99 is the raw scrape payload;
+no table ever holds all 99. They derive into `knockout` (28), `standings` (48
+rows), `live_matches`, and `fixtures` (0 — every source match is FINISHED; the
+semifinals are not scheduled yet). The real defect was not staleness at all.
+
+**2. The real cause was `derive_live`'s clock-relative window.** It kept only
+matches within ±24h of *now* — correct for a table rebuilt every 45 seconds
+(`LIVE_TTL`), which is what it used to be. Under the snapshot model this spec
+introduces, it is actively harmful: a scrape run on a day with no matches writes
+an **empty** `live_matches` table, and auto-deploy publishes it. The old
+production DB showed 1 match because exactly one fell inside that window on the
+day it was last scraped.
+
+So the snapshot model required `derive_live` to become rank-based: all LIVE
+matches, plus every FINISHED match sharing the `stage` of the most recently
+kicked-off FINISHED one — "the most recent completed round". It now returns the
+4 Quarterfinals whether scraped today or next month.
+
+The lesson generalises: **logic that is correct for a cache is not automatically
+correct for an artifact.** Anything clock-relative has to be re-examined when the
+refresh cadence changes from seconds to days. The same trap caught the freshness
+stamp — a failed scrape falling back to the last-good snapshot would still have
+stamped `updated_at = now`, making the UI display today's date over week-old
+scores. `serve()` now stamps `live_meta` only when `source == "live"`.
