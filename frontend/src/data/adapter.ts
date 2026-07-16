@@ -85,7 +85,6 @@ function bracketWinner(t: BracketTie): { team: string; flag: string } | null {
   return null
 }
 
-const pairKey = (a: string, b: string) => [a, b].sort().join(' | ')
 
 const toTie = (stage: string) => (m: WcMatch): BracketTie => ({
   stage, home_team: m.home_team, away_team: m.away_team, home_flag: m.home_flag, away_flag: m.away_flag,
@@ -98,9 +97,13 @@ const tbdTie = (stage: string): BracketTie => ({
 /**
  * Build the knockout bracket from ALL real knockout matches. Every recorded
  * match is shown with its real teams and score; rounds/slots not yet played
- * stay TBD (Quarter-finals onward, and R16 ties still to come). R32 feeders are
- * ordered under the R16 tie their winner plays in, so teams sit in the right
- * position. No pairings are ever invented.
+ * stay TBD. R32 feeders are ordered under the R16 tie their winner plays in,
+ * so teams sit in the right position.
+ *
+ * No pairings are ever invented: each round reads its own real matches rather
+ * than pairing the previous round's winners by slot order. The bracket shape is
+ * not in the data, so slot adjacency is only the truth for the final, where the
+ * two semi-final winners can meet nobody else.
  */
 export function mapBracket(knockout: WcMatch[]): BracketRound[] {
   const r32src = knockout.filter((m) => /32/.test(m.stage ?? '')).map(toTie('Round of 32'))
@@ -128,43 +131,59 @@ export function mapBracket(knockout: WcMatch[]): BracketRound[] {
   while (orderedR16.length < 8) orderedR16.push(tbdTie('Round of 16'))
   while (orderedR32.length < 16) orderedR32.push(tbdTie('Round of 32'))
 
-  // Real results by unordered team pair, so a later-round match that has been
-  // played (e.g. a Quarter-final) shows its real score and its winner advances.
-  const realByPair = new Map<string, WcMatch>()
-  for (const m of knockout) {
-    if (m.home_team && m.away_team && m.home_score != null && m.away_score != null) {
-      realByPair.set(pairKey(m.home_team, m.away_team), m)
+  // Order real ties by where their teams sat in the feeding round, so a tie
+  // renders next to the slot it came from.
+  const orderByFeeder = (ties: BracketTie[], prev: BracketTie[]): BracketTie[] => {
+    const slot = new Map<string, number>()
+    prev.forEach((t, i) => { const w = bracketWinner(t); if (w) slot.set(w.team, i) })
+    const pos = (t: BracketTie) => {
+      const s = [t.home_team, t.away_team]
+        .map((team) => (team ? slot.get(team) : undefined))
+        .filter((v): v is number => v != null)
+      return s.length ? Math.min(...s) : Number.MAX_SAFE_INTEGER
     }
+    return [...ties].sort((a, b) => pos(a) - pos(b))
   }
 
-  // Advance winners: each decided tie sends its winner into the next round,
-  // replacing a TBD. An undecided feeder leaves that side TBD until it's played.
-  // If the advanced pairing has actually been played, overlay its real score.
-  const advance = (prev: BracketTie[], stage: string): BracketTie[] => {
-    const out: BracketTie[] = []
-    for (let i = 0; i < prev.length; i += 2) {
-      const a = bracketWinner(prev[i])
-      const b = prev[i + 1] ? bracketWinner(prev[i + 1]) : null
-      let hs: number | null = null, as: number | null = null, status = 'UP'
-      if (a && b) {
-        const r = realByPair.get(pairKey(a.team, b.team))
-        if (r) {
-          const flip = r.home_team !== a.team
-          hs = flip ? r.away_score : r.home_score
-          as = flip ? r.home_score : r.away_score
-          status = r.status
-        }
-      }
+  const soloTie = (stage: string, w: { team: string; flag: string }): BracketTie => ({
+    stage, home_team: w.team, away_team: null, home_flag: w.flag, away_flag: '',
+    home_score: null, away_score: null, status: 'UP',
+  })
+
+  /**
+   * A round's ties come from its real matches. A qualifier with no real tie yet
+   * takes a slot alone, opponent TBD — advancing a team is a fact, but naming
+   * its opponent is a guess unless only one pairing is possible (the final).
+   */
+  const buildRound = (prev: BracketTie[], stage: string, re: RegExp): BracketTie[] => {
+    const slots = Math.ceil(prev.length / 2)
+    const real = knockout
+      .filter((m) => re.test(m.stage ?? '') && m.home_team && m.away_team)
+      .map(toTie(stage))
+    const out = orderByFeeder(real, prev).slice(0, slots)
+
+    const shown = new Set(out.flatMap((t) => [t.home_team, t.away_team]).filter(Boolean))
+    const pending = prev
+      .map(bracketWinner)
+      .filter((w): w is { team: string; flag: string } => !!w && !shown.has(w.team))
+
+    if (!out.length && prev.length === 2 && pending.length === 2) {
+      // The final: two semi-final winners can meet nobody but each other.
       out.push({
-        stage, home_team: a?.team ?? null, away_team: b?.team ?? null,
-        home_flag: a?.flag ?? '', away_flag: b?.flag ?? '', home_score: hs, away_score: as, status,
+        stage, home_team: pending[0].team, away_team: pending[1].team,
+        home_flag: pending[0].flag, away_flag: pending[1].flag,
+        home_score: null, away_score: null, status: 'UP',
       })
+    } else {
+      for (const w of pending) if (out.length < slots) out.push(soloTie(stage, w))
     }
+    while (out.length < slots) out.push(tbdTie(stage))
     return out
   }
-  const qf = advance(orderedR16, 'Quarter-finals')
-  const sf = advance(qf, 'Semi-finals')
-  const final = advance(sf, 'Final')
+
+  const qf = buildRound(orderedR16, 'Quarter-finals', /quarter/i)
+  const sf = buildRound(qf, 'Semi-finals', /semi/i)
+  const final = buildRound(sf, 'Final', /^final$/i)
 
   const rounds: BracketRound[] = []
   if (r32src.length) rounds.push({ stage: 'Round of 32', ties: orderedR32 })
