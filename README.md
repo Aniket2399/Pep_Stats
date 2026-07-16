@@ -27,7 +27,10 @@ FIFA-style UI.
 - **Bracket** — built from all real knockout matches; winners auto-advance round by round
 - **Groups** — the 12 live group tables
 
-An **Update scores** button triggers a live refresh of the World Cup data.
+A **SCORES AS OF `<date>`** label shows when the World Cup data was last
+scraped — scores ship with the build, so see
+[Refreshing the World Cup scores](#refreshing-the-world-cup-scores) to publish
+new ones.
 
 ## Screenshots
 
